@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+######################
+
+Shared_Config.hpp
