@@ -1,0 +1,18 @@
+#ifndef __SHARED_LIBS_CONFIG__
+#define __SHARED_LIBS_CONFIG__
+
+#define SHARED_SET_CONFIG
+
+/*
+    기능을 사용하기 위해 해당 파일을 Shared_Config.hpp 파일로 복사
+    이후 필요한 기능을 주석해제 후 사용
+*/
+
+// LOG 라이브러리를 통해 LOGGING 기능을 사용합니다.
+// 해당 값이 define 되지 않은 경우 로깅되지 않습니다.
+// #define USING_SHARED_LOGGER
+
+// Qt관련 함수,QT 관련 래퍼 함수,일부 동작을 Qt로 대체하도록 합니다.
+// #define USING_QT_LIBS
+
+#endif
