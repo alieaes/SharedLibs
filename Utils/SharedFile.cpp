@@ -5,6 +5,7 @@
 #include "Utils/SharedFile.h"
 
 #include <fstream>
+#include <filesystem>
 
 #include "String/SharedString.h"
 
@@ -18,7 +19,7 @@ namespace Shared
 {
     namespace File
     {
-        std::wstring GetCurrentPath( bool bIncludeSeparator )
+        XString GetCurrentPath( bool bIncludeSeparator )
         {
             std::wstring ret;
             wchar_t result[ MAX_PATH ];
@@ -34,19 +35,14 @@ namespace Shared
             return ret;
         }
 
-        std::wstring NormalizePath( const std::wstring& sFilePath )
+        XString NormalizePath( const XString& sFilePath )
         {
             std::wstring s = sFilePath;
             std::replace( s.begin(), s.end(), L'\\', L'/' );
             return s;
         }
 
-        std::wstring NormalizePath( const std::string& sFilePath )
-        {
-            return NormalizePath( std::wstring( sFilePath.begin(), sFilePath.end() ) );
-        }
-
-        bool IsExistFile( const std::wstring& sFilePath )
+        bool IsExistFile( const XString& sFilePath )
         {
             bool isExist = false;
             struct _stat64i32 info;
@@ -61,7 +57,7 @@ namespace Shared
             return isExist;
         }
 
-        bool IsExistDir( const std::wstring& sFilePath )
+        bool IsExistDir( const XString& sFilePath )
         {
             bool isExist = false;
             struct _stat64i32 info;
@@ -76,41 +72,41 @@ namespace Shared
             return isExist;
         }
 
-        std::wstring GetFileExts( const std::wstring& sFileFullPath )
+        XString GetFileExts( const XString& sFileFullPath )
         {
             // TODO : 현재 확장자가 없는 파일은 고려되고 있지 않음 추가 필요
-            if( sFileFullPath.empty() == true )
-                return std::wstring();
+            if( sFileFullPath.IsEmpty() == true )
+                return XString();
 
             std::wstring sExts = sFileFullPath;
             int find = sExts.rfind( L'.' );
             return sExts.substr( find, sExts.length() - find );
         }
 
-        std::wstring GetFileBaseName(const std::wstring& sFileFullPath)
+        XString GetFileBaseName( const XString& sFileFullPath )
         {
             // TODO : 현재 확장자가 없는 파일은 고려되고 있지 않음 추가 필요
-            if( sFileFullPath.empty() == true )
-                return std::wstring();
+            if( sFileFullPath.IsEmpty() == true )
+                return XString();
 
             std::wstring sExts = sFileFullPath;
             int find = sExts.rfind( L'.' );
             return sExts.substr( 0, find );
         }
 
-        std::wstring FindFileName( const std::wstring& sFileFullPath )
+        XString FindFileName( const XString& sFileFullPath )
         {
-            std::wstring ws = sFileFullPath.substr( sFileFullPath.find_last_of( L"/" ) + 1 );
+            XString ws = sFileFullPath.substr( sFileFullPath.find_last_of( L"/" ) + 1 );
             return ws;
         }
 
-        std::wstring FindFilePath( const std::wstring& sFileFullPath )
+        XString FindFilePath( const XString& sFileFullPath )
         {
-            std::wstring ws = sFileFullPath.substr( 0, sFileFullPath.find_last_of( L"/" ) + 1 );
+            XString ws = sFileFullPath.substr( 0, sFileFullPath.find_last_of( L"/" ) + 1 );
             return ws;
         }
 
-        TyEnFileType RetrieveFileType( const std::wstring& sFilePath )
+        TyEnFileType RetrieveFileType( const XString& sFilePath )
         {
             TyEnFileType eFileType = FILE_TYPE_NONE;
 
@@ -119,7 +115,7 @@ namespace Shared
                 if( IsExistFile( sFilePath ) == false )
                     break;
 
-                std::ifstream file( sFilePath );
+                std::ifstream file( sFilePath.c_str() );
 
                 if( file.is_open() == false )
                     break;
@@ -143,12 +139,12 @@ namespace Shared
             return eFileType;
         }
 
-        std::vector<std::wstring> GetFileListFromFolder( const std::wstring& sFileFullPath )
+        std::vector<XString> GetFileListFromFolder( const XString& sFileFullPath )
         {
-            std::vector< std::wstring > vecFileList;
+            std::vector< XString > vecFileList;
 
-            for( const auto& entry : std::filesystem::directory_iterator( sFileFullPath ) )
-                vecFileList.push_back( entry.path() );
+            for( const auto& entry : std::filesystem::directory_iterator( sFileFullPath.c_str() ) )
+                vecFileList.push_back( entry.path().string() );
 
             return vecFileList;
         }

@@ -4,6 +4,7 @@
 #include "SharedBase.h"
 
 #include "String/SharedString.h"
+#include "String/SharedXString.h"
 
 #include <string>
 
@@ -16,11 +17,11 @@ namespace Shared
 {
     typedef struct _tyFileInfo
     {
-        std::wstring                 sFileFullPath;
-        std::wstring                 sFileName;
-        std::wstring                 sFilePath;
-        std::wstring                 sFileExts;
-        std::wstring                 sFileBaseName;
+        XString                      sFileFullPath;
+        XString                      sFileName;
+        XString                      sFilePath;
+        XString                      sFileExts;
+        XString                      sFileBaseName;
 
         bool                         isExist;
 
@@ -41,22 +42,21 @@ namespace Shared
 
     namespace File
     {
-        std::wstring                 GetCurrentPath( bool bIncludeSeparator = false );
-        std::wstring                 NormalizePath( const std::wstring& sFilePath );
-        std::wstring                 NormalizePath( const std::string& sFilePath );
+        XString                      GetCurrentPath( bool bIncludeSeparator = false );
+        XString                      NormalizePath( const XString& sFilePath );
 
-        bool                         IsExistFile( const std::wstring& sFilePath );
-        bool                         IsExistDir( const std::wstring& sFilePath );
+        bool                         IsExistFile( const XString& sFilePath );
+        bool                         IsExistDir( const XString& sFilePath );
 
-        std::wstring                 GetFileExts( const std::wstring& sFileFullPath );
-        std::wstring                 GetFileBaseName( const std::wstring& sFileFullPath );
+        XString                      GetFileExts( const XString& sFileFullPath );
+        XString                      GetFileBaseName( const XString& sFileFullPath );
 
-        std::wstring                 FindFileName( const std::wstring& sFileFullPath );
-        std::wstring                 FindFilePath( const std::wstring& sFileFullPath );
+        XString                      FindFileName( const XString& sFileFullPath );
+        XString                      FindFilePath( const XString& sFileFullPath );
 
-        TyEnFileType                 RetrieveFileType( const std::wstring& sFilePath );
+        TyEnFileType                 RetrieveFileType( const XString& sFilePath );
 
-        std::vector< std::wstring >  GetFileListFromFolder( const std::wstring& sFileFullPath );
+        std::vector< XString >       GetFileListFromFolder( const XString& sFileFullPath );
 
         class SFileInfo
         {
@@ -66,24 +66,17 @@ namespace Shared
                 _fileInfo = TyStFileInfo();
             }
 
-            SFileInfo( const std::wstring& sFileFullPath )
+            SFileInfo( const XString& sFileFullPath )
             {
                 _fileInfo = TyStFileInfo();
                 _fileInfo.sFileFullPath = NormalizePath( sFileFullPath );
                 Init();
             }
 
-            SFileInfo( const std::string& sFileFullPath )
-            {
-                _fileInfo = TyStFileInfo();
-                _fileInfo.sFileFullPath = NormalizePath( String::s2ws( sFileFullPath ) );
-                Init();
-            }
-
-            std::wstring                 FileName() { return _fileInfo.sFileName; }
-            std::wstring                 FilePath() { return _fileInfo.sFilePath; }
-            std::wstring                 FileBaseName() { return _fileInfo.sFileBaseName; }
-            std::wstring                 FileExts() { return _fileInfo.sFileExts; }
+            XString                      FileName() { return _fileInfo.sFileName; }
+            XString                      FilePath() { return _fileInfo.sFilePath; }
+            XString                      FileBaseName() { return _fileInfo.sFileBaseName; }
+            XString                      FileExts() { return _fileInfo.sFileExts; }
             bool                         IsExist() { return _fileInfo.isExist; }
 
             bool                         Rename( const std::wstring& sDst )
@@ -91,7 +84,7 @@ namespace Shared
                 bool isSuccess = false;
                 std::wstring sNewFileFullPath = NormalizePath( _fileInfo.sFilePath + sDst );
                 std::error_code ec;
-                std::filesystem::rename( _fileInfo.sFileFullPath, sNewFileFullPath, ec );
+                std::filesystem::rename( _fileInfo.sFileFullPath.string(), sNewFileFullPath, ec );
 
                 if( ec )
                     isSuccess = false;
