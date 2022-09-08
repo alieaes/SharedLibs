@@ -109,6 +109,11 @@ public:
     std::string                      toString();
     std::wstring                     toWString();
 
+    // 값이 존재한다고 TRUE가 되지 않음, 1/Yes/True/y 의 값이여야 TRUE로 반환됨
+    bool                             toBool();
+    int                              toInt();
+    long                             toLong();
+
     bool                             IsEmpty() const;
 
     int                              size() const;

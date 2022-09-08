@@ -8,7 +8,7 @@
 #include <qdatetime.h>
 #endif
 
-std::string XString::toString()
+std::string XString::toString() const
 {
     return Shared::String::ws2s( _str );
 }
@@ -16,6 +16,27 @@ std::string XString::toString()
 std::wstring XString::toWString()
 {
     return _str;
+}
+
+bool XString::toBool() const
+{
+    std::wstring tmp = _str;
+    std::transform( tmp.begin(), tmp.end(), tmp.begin(), towlower );
+
+    if( tmp == L"y" || tmp == L"true" || tmp == L"1" || tmp == L"yes" )
+        return true;
+
+    return false;
+}
+
+int XString::toInt() const
+{
+    return std::stoi( _str );
+}
+
+long XString::toLong() const
+{
+    return std::stol( _str );
 }
 
 bool XString::IsEmpty() const
