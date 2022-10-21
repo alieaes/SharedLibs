@@ -3,6 +3,8 @@
 
 #include "SharedBase.h"
 
+#include "String/SharedXString.h"
+
 #include <string>
 
 #ifdef USING_QT_LIBS
@@ -14,10 +16,28 @@ namespace Shared
 {
     namespace Sqlite
     {
+        typedef struct _dbInfo
+        {
+            auto operator<=>( _dbInfo const& ) const = default;
+
+            XString                                 sDBName;
+            XString                                 sFilePath;
+
+        } DB_INFO;
+
         class cSQLiteMgr
         {
         public:
             cSQLiteMgr();
+
+            bool                                   InitDB( DB_INFO dbInfo );
+            bool                                   GetDB( XString sDBName );
+
+        protected:
+            bool                                   IsExistDBInfo( XString sDBName );
+
+        private:
+            QMap< XString, DB_INFO >               _mapDBINFO;
         };
     }
 }
