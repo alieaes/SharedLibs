@@ -74,12 +74,16 @@ namespace Shared
 
         XString GetFileExts( const XString& sFileFullPath )
         {
-            // TODO : 현재 확장자가 없는 파일은 고려되고 있지 않음 추가 필요
             if( sFileFullPath.IsEmpty() == true )
                 return XString();
 
             std::wstring sExts = sFileFullPath;
             int find = sExts.rfind( L'.' );
+
+            // 확장자가 없는 경우 전체경로를 그대로 돌려줌
+            if( find == -1 )
+                return sFileFullPath;
+
             return sExts.substr( find, sExts.length() - find );
         }
 
