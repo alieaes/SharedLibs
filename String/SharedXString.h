@@ -1,4 +1,4 @@
-#ifndef __HDR_SHARED_XSTRING__
+ï»¿#ifndef __HDR_SHARED_XSTRING__
 #define __HDR_SHARED_XSTRING__
 
 #include <string>
@@ -51,28 +51,28 @@ public:
     }
 
     /////////////// XString <- X ///////////////
-    XString operator = ( std::wstring& ws ) // XString xs = std::wstring( L"TEST" );
+    XString operator = ( std::wstring& ws )          // XString xs = std::wstring( L"TEST" );
     {
         return XString( ws );
     }
 
-    XString operator = ( std::string& s ) // XString xs = std::string( "TEST" );
+    XString operator = ( std::string& s )            // XString xs = std::string( "TEST" );
     {
         return XString( s );
     }
 
-    XString operator = ( const char* c ) // XString xs = "TEST";
+    XString operator = ( const char* c )             // XString xs = "TEST";
     {
         return XString( c );
     }
 
-    XString operator = ( const wchar_t* wc ) // XString xs = L"TEST";
+    XString operator = ( const wchar_t* wc )         // XString xs = L"TEST";
     {
         return XString( wc );
     }
 
 #ifdef USING_QT_LIBS
-    XString operator = ( QString& qs ) // XString xs = QString( "TEST" );
+    XString operator = ( QString& qs )               // XString xs = QString( "TEST" );
     {
         return XString( qs );
     }
@@ -106,17 +106,33 @@ public:
         return _str;
     }
 
-    std::string                      toString();
-    std::wstring                     toWString();
+    bool operator ==( std::wstring& xs )
+    {
+        return xs.compare( _str ) == 0 ? true : false;
+    }
 
-    // °ªÀÌ Á¸ÀçÇÑ´Ù°í TRUE°¡ µÇÁö ¾ÊÀ½, 1/Yes/True/y ÀÇ °ªÀÌ¿©¾ß TRUE·Î ¹ÝÈ¯µÊ
-    bool                             toBool();
-    int                              toInt();
-    long                             toLong();
+    bool operator ==( const std::wstring& xs )
+    {
+        return xs.compare( _str ) == 0 ? true : false;
+    }
+
+    std::string                      toString() const;
+    std::wstring                     toWString();
+#ifdef USING_QT_LIBS
+    QString                          toQString() const;
+#endif  // USING_QT_LIBS
+    // ê°’ì´ ì¡´ìž¬í•œë‹¤ê³  TRUEê°€ ë˜ì§€ ì•ŠìŒ, 1/Yes/True/y ì˜ ê°’ì´ì—¬ì•¼ TRUEë¡œ ë°˜í™˜ë¨
+    bool                             toBool() const;
+    int                              toInt() const;
+    long                             toLong() const;
+
+    XString                          toLower() const;
+    XString                          toUpper() const;
 
     bool                             IsEmpty() const;
 
     int                              size() const;
+    int                              count( const XString& find ) const;
 
     XString                          substr( int nDst ) const;
     XString                          substr( int nSrc, int nDst ) const;

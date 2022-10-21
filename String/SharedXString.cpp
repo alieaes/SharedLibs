@@ -18,10 +18,16 @@ std::wstring XString::toWString()
     return _str;
 }
 
+#ifdef USING_QT_LIBS
+QString XString::toQString() const
+{
+    return QString::fromStdWString( _str );
+}
+#endif
+
 bool XString::toBool() const
 {
-    std::wstring tmp = _str;
-    std::transform( tmp.begin(), tmp.end(), tmp.begin(), towlower );
+    auto tmp = toLower();
 
     if( tmp == L"y" || tmp == L"true" || tmp == L"1" || tmp == L"yes" )
         return true;
@@ -39,6 +45,22 @@ long XString::toLong() const
     return std::stol( _str );
 }
 
+XString XString::toLower() const
+{
+    std::wstring tmp = _str;
+    std::transform( tmp.begin(), tmp.end(), tmp.begin(), towlower );
+
+    return tmp;
+}
+
+XString XString::toUpper() const
+{
+    std::wstring tmp = _str;
+    std::transform( tmp.begin(), tmp.end(), tmp.begin(), towupper );
+
+    return tmp;
+}
+
 bool XString::IsEmpty() const
 {
     return _str.empty();
@@ -47,6 +69,24 @@ bool XString::IsEmpty() const
 int XString::size() const
 {
     return _str.size();
+}
+
+int XString::count( const XString& find ) const
+{
+    int nCount = 0;
+
+    if( find.IsEmpty() == true )
+        return nCount;
+
+    for( int idx = 0; idx < _str.size(); idx++ )
+    {
+        if( _str.find( find ) == -1 )
+            break;
+        else if( _str.find( find, idx ) <= idx )
+            nCount += 1;
+    }
+
+    return nCount;
 }
 
 XString XString::substr(int nDst) const
