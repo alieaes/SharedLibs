@@ -22,6 +22,8 @@ public:
     XString( const char* c )
     {
         _str = Shared::String::s2ws( c );
+        if( _str.empty() == false )
+            _str.pop_back();
     }
 
     XString( const wchar_t* wc )
@@ -50,31 +52,41 @@ public:
     {
     }
 
+    auto operator<=>( XString const& ) const = default;
+
     /////////////// XString <- X ///////////////
     XString operator = ( std::wstring& ws )          // XString xs = std::wstring( L"TEST" );
     {
-        return XString( ws );
+        _str = ws;
+        return _str;
     }
 
     XString operator = ( std::string& s )            // XString xs = std::string( "TEST" );
     {
-        return XString( s );
+        _str = std::wstring( s.begin(), s.end() );
+        return _str;
     }
 
     XString operator = ( const char* c )             // XString xs = "TEST";
     {
-        return XString( c );
+        _str = Shared::String::s2ws( c );
+        if( _str.empty() == false )
+            _str.pop_back();
+
+        return _str;
     }
 
     XString operator = ( const wchar_t* wc )         // XString xs = L"TEST";
     {
-        return XString( wc );
+        _str = wc;
+        return _str;
     }
 
 #ifdef USING_QT_LIBS
     XString operator = ( QString& qs )               // XString xs = QString( "TEST" );
     {
-        return XString( qs );
+        _str = qs.toStdWString();
+        return _str;
     }
 #endif  // USING_QT_LIBS
     ////////////////////////////////////////////
