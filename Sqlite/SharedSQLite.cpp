@@ -37,6 +37,7 @@ namespace Shared
 
                 bool isExist = false;
 
+                // TODO : 파일이 존재하는 경우엔 Migration을 진행하도록 함
                 if( File::IsExistFile( dbInfo.sFilePath ) == true )
                     isExist = true;
 
@@ -59,7 +60,7 @@ namespace Shared
 
         bool cSQLiteMgr::IsExistDBInfo( XString sDBName )
         {
-            return true;
+            return _mapDBINFO.count( sDBName ) > 0 ? true : false;
         }
     }
 }

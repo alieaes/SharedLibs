@@ -37,7 +37,7 @@ namespace Shared
             bool                                   IsExistDBInfo( XString sDBName );
 
         private:
-            QMap< XString, DB_INFO >               _mapDBINFO;
+            std::map< XString, DB_INFO >           _mapDBINFO;
         };
     }
 }
