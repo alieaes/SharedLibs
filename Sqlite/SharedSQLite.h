@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include "sqlite3.h"
+
 #ifdef USING_QT_LIBS
 #include <qstring.h>
 #endif // USING_QTLIB
@@ -37,7 +39,8 @@ namespace Shared
             bool                                   IsExistDBInfo( XString sDBName );
 
         private:
-            std::map< XString, DB_INFO >           _mapDBINFO;
+            std::map< XString, DB_INFO >           _mapNameToInfo;
+            std::map< XString, sqlite3* >          _mapNameToSql;
         };
     }
 }

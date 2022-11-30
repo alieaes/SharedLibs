@@ -45,6 +45,14 @@ namespace Shared
                 sqlite3_stmt* res;
 
                 int rc = sqlite3_open16( dbInfo.sFilePath.c_str(), &db );
+
+                if( rc != SQLITE_OK )
+                    break;
+
+                _mapNameToSql[ dbInfo.sDBName ] = db;
+
+                isSuccess = true;
+
             }
             while( false );
 
@@ -60,7 +68,7 @@ namespace Shared
 
         bool cSQLiteMgr::IsExistDBInfo( XString sDBName )
         {
-            return _mapDBINFO.count( sDBName ) > 0 ? true : false;
+            return _mapNameToInfo.count( sDBName ) > 0 ? true : false;
         }
     }
 }
