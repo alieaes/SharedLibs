@@ -77,7 +77,11 @@ namespace Shared
             XString                      FilePath() { return _fileInfo.sFilePath; }
             XString                      FileBaseName() { return _fileInfo.sFileBaseName; }
             XString                      FileExts() { return _fileInfo.sFileExts; }
-            bool                         IsExist() { return _fileInfo.isExist; }
+            bool                         IsExist()
+            {
+                _fileInfo.isExist = IsExistFile( _fileInfo.sFileFullPath );
+                return _fileInfo.isExist;
+            }
 
             bool                         Rename( const std::wstring& sDst )
             {
@@ -104,8 +108,6 @@ namespace Shared
         private:
             void Init()
             {
-                _fileInfo.isExist = IsExistFile( _fileInfo.sFileFullPath );
-
                 _fileInfo.sFileName = FindFileName( _fileInfo.sFileFullPath );
                 _fileInfo.sFilePath = FindFilePath( _fileInfo.sFileFullPath );
                 _fileInfo.sFileExts = GetFileExts( _fileInfo.sFileFullPath );
