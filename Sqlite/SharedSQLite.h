@@ -18,12 +18,31 @@ namespace Shared
 {
     namespace Sqlite
     {
+        class cSQLiteDB
+        {
+        public:
+            cSQLiteDB( sqlite3* db );
+            bool                                   SetDB( sqlite3* db );
+            sqlite3*                               Data();
+            bool                                   PrepareSQL( sqlite3_stmt* stmt, const XString& sQuery );
+            bool                                   BindValue( sqlite3_stmt* stmt, const XString& sBind, const XString& sValue );
+            bool                                   ExecuteSQL( sqlite3_stmt* stmt, const XString& sQuery );
+            bool                                   Next();
+
+        private:
+            sqlite3*                               _db;
+        };
+
+        typedef std::shared_ptr<cSQLiteDB> spSQLiteDB;
+
         typedef struct _dbInfo
         {
             auto operator<=>( _dbInfo const& ) const = default;
 
             XString                                 sDBName;
             XString                                 sFilePath;
+
+            spSQLiteDB                              spSQLite;
 
         } DB_INFO;
 
@@ -33,15 +52,17 @@ namespace Shared
             cSQLiteMgr();
 
             bool                                   InitDB( DB_INFO dbInfo );
-            bool                                   GetDB( XString sDBName );
+            spSQLiteDB                             GetDB( XString sDBName );
+            bool                                   Close( XString sDBName );
+
 
         protected:
             bool                                   IsExistDBInfo( XString sDBName );
 
         private:
             std::map< XString, DB_INFO >           _mapNameToInfo;
-            std::map< XString, sqlite3* >          _mapNameToSql;
         };
+
     }
 }
 

@@ -16,6 +16,89 @@ namespace Shared
 {
     namespace Sqlite
     {
+        cSQLiteDB::cSQLiteDB( sqlite3* db )
+        {
+            _db = db;
+        }
+
+        bool cSQLiteDB::SetDB(sqlite3* db)
+        {
+            _db = db;
+        }
+
+        sqlite3* cSQLiteDB::Data()
+        {
+            return _db;
+        }
+
+        bool cSQLiteDB::PrepareSQL( sqlite3_stmt* stmt, const XString& sQuery )
+        {
+            bool isSuccess = false;
+            int rc = 0;
+
+            do
+            {
+                if( _db == NULLPTR )
+                    break;
+
+                rc = sqlite3_prepare16_v2( _db, sQuery.c_str(), -1, &stmt, NULL );
+
+                if( rc != SQLITE_OK )
+                    break;
+
+                isSuccess = true;
+
+            } while( false );
+
+            return isSuccess;
+        }
+
+        bool cSQLiteDB::BindValue( sqlite3_stmt* stmt, const XString& sBind, const XString& sValue )
+        {
+            bool isSuccess = false;
+            int rc = 0;
+
+            do
+            {
+                if( _db == NULLPTR )
+                    break;
+
+                auto idx = sqlite3_bind_parameter_index( stmt, sBind.toString().c_str() );
+                rc = sqlite3_bind_text16( stmt, idx, sValue.c_str(), sValue.size(), SQLITE_STATIC );
+
+                if( rc != SQLITE_OK )
+                    break;
+
+                isSuccess = true;
+
+            } while (false);
+
+            return isSuccess;
+        }
+
+        bool cSQLiteDB::ExecuteSQL( sqlite3_stmt* stmt, const XString& sQuery )
+        {
+            bool isSuccess = false;
+            int rc = 0;
+
+            do
+            {
+                if( _db == NULLPTR )
+                    break;
+
+                auto idx = sqlite3_bind_parameter_index( stmt, sBind.toString().c_str() );
+                rc = sqlite3_bind_text16( stmt, idx, sValue.c_str(), sValue.size(), SQLITE_STATIC );
+
+                if( rc != SQLITE_OK )
+                    break;
+
+                isSuccess = true;
+
+            } while( false );
+
+            return isSuccess;
+        }
+
         cSQLiteMgr::cSQLiteMgr()
         {
         }
@@ -47,9 +130,15 @@ namespace Shared
                 int rc = sqlite3_open16( dbInfo.sFilePath.c_str(), &db );
 
                 if( rc != SQLITE_OK )
+                {
+                    sqlite3_close( db );
                     break;
+                }
 
-                _mapNameToSql[ dbInfo.sDBName ] = db;
+                spSQLiteDB sp;
+                sp->SetDB( db );
+                dbInfo.spSQLite = sp;
+                _mapNameToInfo[ dbInfo.sDBName ] = dbInfo;
 
                 isSuccess = true;
 
@@ -59,9 +148,27 @@ namespace Shared
             return isSuccess;
         }
 
-        bool cSQLiteMgr::GetDB( XString sDBName )
+        spSQLiteDB cSQLiteMgr::GetDB( XString sDBName )
+        {
+            spSQLiteDB db = NULLPTR;
+
+            if( _mapNameToInfo.count( sDBName ) > 0 )
+                db = _mapNameToInfo[ sDBName ].spSQLite;
+
+            return db;
+        }
+
+        bool cSQLiteMgr::Close( XString sDBName )
         {
             bool isSuccess = false;
+            auto db = GetDB( sDBName );
+
+            do
+            {
+                if( db != NULLPTR )
+                    isSuccess = sqlite3_close( db->Data() ) == SQLITE_OK;
+
+            } while( false );
 
             return isSuccess;
         }
