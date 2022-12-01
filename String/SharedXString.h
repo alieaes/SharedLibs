@@ -82,6 +82,11 @@ public:
         return _str;
     }
 
+    XString operator = ( const XString& wc )         // XString xs = L"TEST";
+    {
+        return wc;
+    }
+
 #ifdef USING_QT_LIBS
     XString operator = ( QString& qs )               // XString xs = QString( "TEST" );
     {

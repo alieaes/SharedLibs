@@ -89,12 +89,12 @@ int XString::count( const XString& find ) const
     return nCount;
 }
 
-XString XString::substr(int nDst) const
+XString XString::substr( int nDst ) const
 {
     return _str.substr( nDst );
 }
 
-XString XString::substr(int nSrc, int nDst) const
+XString XString::substr( int nSrc, int nDst ) const
 {
     return _str.substr( nSrc, nDst );
 }
