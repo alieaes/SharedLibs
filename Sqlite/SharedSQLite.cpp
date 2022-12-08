@@ -16,12 +16,87 @@ namespace Shared
 {
     namespace Sqlite
     {
+        cStmt::cStmt()
+            :_stmt( NULLPTR )
+        {
+        }
+
+        cStmt::~cStmt()
+        {
+            if( _stmt != NULLPTR )
+                sqlite3_reset( _stmt.get() );
+
+            if( _stmt != NULLPTR )
+                _stmt.reset();
+        }
+
+        cStmt& cStmt::operator=( const cStmt& rhs )
+        {
+            _stmt = rhs._stmt;
+
+            return *this;
+        }
+
+        bool cStmt::Next()
+        {
+            bool isSuccess = false;
+            int rc = 0;
+
+            do
+            {
+                if( _db == NULLPTR )
+                    break;
+
+                // TODO : LOCK 등에 의해 값을 가져올 수 없는 상황을 대비해야 함.
+                rc = sqlite3_step( Get() );
+
+                if( rc == SQLITE_ROW )
+                    isSuccess = true;
+
+                if( rc == SQLITE_OK )
+                    isSuccess = true;
+
+            } while( false );
+
+            return isSuccess;
+        }
+
+        XString cStmt::Value( const XString& sColumnName )
+        {
+            XString sRet;
+            int rc = 0;
+
+            do
+            {
+                if( _db == NULLPTR )
+                    break;
+
+                for( int nIdx = 0; nIdx < GetColumnCnt(); ++nIdx )
+                {
+                    XString s = sqlite3_column_name( Get(), nIdx );
+                    if( _wcsicmp( s.c_str(), sColumnName.c_str() ) == 0 )
+                    {
+                        // wstring NULLPTR 예외를 피하기 위함, 좋은 방법이 있다면 바꾸도록 해야함
+                        auto s = sqlite3_column_text( Get(), nIdx );
+                        if( s == NULL )
+                            break;
+
+                        sRet = static_cast< const wchar_t* >( sqlite3_column_text16( Get(), nIdx ) );
+                        break;
+                    }
+                }
+
+            } while( false );
+
+            return sRet;
+        }
+
         cSQLiteDB::cSQLiteDB( sqlite3* db )
         {
             _db = db;
         }
 
-        bool cSQLiteDB::SetDB(sqlite3* db)
+        void cSQLiteDB::SetDB( sqlite3* db )
         {
             _db = db;
         }
@@ -31,20 +106,23 @@ namespace Shared
             return _db;
         }
 
-        bool cSQLiteDB::PrepareSQL( sqlite3_stmt* stmt, const XString& sQuery )
+        bool cSQLiteDB::PrepareSQL( cStmt& stmt, const XString& sQuery )
         {
             bool isSuccess = false;
             int rc = 0;
+            auto s = stmt.Get();
 
             do
             {
                 if( _db == NULLPTR )
                     break;
 
-                rc = sqlite3_prepare16_v2( _db, sQuery.c_str(), -1, &stmt, NULL );
+                rc = sqlite3_prepare16_v2( _db, sQuery.c_str(), -1, &s, NULL );
 
                 if( rc != SQLITE_OK )
                     break;
+
+                stmt = cStmt( s );
 
                 isSuccess = true;
 
@@ -53,7 +131,7 @@ namespace Shared
             return isSuccess;
         }
 
-        bool cSQLiteDB::BindValue( sqlite3_stmt* stmt, const XString& sBind, const XString& sValue )
+        bool cSQLiteDB::BindValue( cStmt stmt, const XString& sBind, const XString& sValue )
         {
             bool isSuccess = false;
             int rc = 0;
@@ -63,8 +141,8 @@ namespace Shared
                 if( _db == NULLPTR )
                     break;
 
-                auto idx = sqlite3_bind_parameter_index( stmt, sBind.toString().c_str() );
-                rc = sqlite3_bind_text16( stmt, idx, sValue.c_str(), sValue.size(), SQLITE_STATIC );
+                auto idx = sqlite3_bind_parameter_index( stmt.Get(), sBind.toString().c_str() );
+                rc = sqlite3_bind_text16( stmt.Get(), idx, sValue.c_str(), sValue.size(), SQLITE_STATIC );
 
                 if( rc != SQLITE_OK )
                     break;
@@ -76,23 +154,26 @@ namespace Shared
             return isSuccess;
         }
 
-        bool cSQLiteDB::ExecuteSQL( sqlite3_stmt* stmt, const XString& sQuery )
+        bool cSQLiteDB::ExecuteSQL( cStmt& stmt )
         {
             bool isSuccess = false;
             int rc = 0;
+            auto s = stmt.Get();
 
             do
             {
                 if( _db == NULLPTR )
                     break;
 
-                auto idx = sqlite3_bind_parameter_index( stmt, sBind.toString().c_str() );
-                rc = sqlite3_bind_text16( stmt, idx, sValue.c_str(), sValue.size(), SQLITE_STATIC );
+                rc = sqlite3_step( s );
 
-                if( rc != SQLITE_OK )
-                    break;
+                if( rc == SQLITE_ROW || rc == SQLITE_OK )
+                    isSuccess = true;
 
-                isSuccess = true;
+                rc = sqlite3_reset( s );
+
+                stmt.SetColumnCnt( sqlite3_column_count( s ) );
+                stmt.SetDB( _db );
 
             } while( false );
 
@@ -101,6 +182,24 @@ namespace Shared
 
         cSQLiteMgr::cSQLiteMgr()
         {
+        }
+
+        bool cSQLiteMgr::InitDB( XString sDBName, XString sFilePath )
+        {
+            bool isSuccess = false;
+
+            do
+            {
+
+                DB_INFO dbInfo;
+                dbInfo.sDBName = sDBName;
+                dbInfo.sFilePath = sFilePath;
+
+                isSuccess = InitDB( dbInfo );
+
+            } while (false);
+
+            return isSuccess;
         }
 
         bool cSQLiteMgr::InitDB( DB_INFO dbInfo )
@@ -135,7 +234,7 @@ namespace Shared
                     break;
                 }
 
-                spSQLiteDB sp;
+                spSQLiteDB sp = spSQLiteDB( new cSQLiteDB );
                 sp->SetDB( db );
                 dbInfo.spSQLite = sp;
                 _mapNameToInfo[ dbInfo.sDBName ] = dbInfo;
