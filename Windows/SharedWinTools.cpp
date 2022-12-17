@@ -201,7 +201,7 @@ namespace Shared
             if( File::IsExistDir( sDest ) == false )
                 CreateDirectory( sDest.c_str(), NULL );
 
-            std::wstring sArgs = std::format( L"{}/7za.exe x -y -o\"{}\" {}", File::GetCurrentPath().toWString(), sDest, sFileName );
+            std::wstring sArgs = std::format( L"{}/7za.exe x -y -o\"{}\" \"{}\"", File::GetCurrentPath().toWString(), sDest, sFileName );
 
             std::replace( sArgs.begin(), sArgs.end(), L'/', L'\\' );
 
