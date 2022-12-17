@@ -21,6 +21,9 @@ public:
 
     XString( const char* c )
     {
+        if( c == NULL )
+            return;
+
         _str = Shared::String::s2ws( c );
         if( _str.empty() == false )
             _str.pop_back();
@@ -28,7 +31,19 @@ public:
 
     XString( const wchar_t* wc )
     {
+        if( wc == NULL )
+            return;
+
         _str = wc;
+    }
+
+    XString( const unsigned char* c )
+    {
+        if( c == NULL )
+            return;
+
+        std::string s = static_cast< std::string >( reinterpret_cast< const char* >( c ) ); // new style
+        _str = std::wstring( s.begin(), s.end() );
     }
 
     XString( const std::wstring& ws )
@@ -76,6 +91,17 @@ public:
         return _str;
     }
 
+    XString operator = ( const unsigned char* c )             // XString xs = "TEST";
+    {
+        std::string s = static_cast< std::string >( reinterpret_cast< const char* >( c ) ); // new style
+
+        _str = Shared::String::s2ws( s );
+        if( _str.empty() == false )
+            _str.pop_back();
+
+        return _str;
+    }
+
     XString operator = ( const wchar_t* wc )         // XString xs = L"TEST";
     {
         _str = wc;
@@ -84,7 +110,8 @@ public:
 
     XString operator = ( const XString& wc )         // XString xs = L"TEST";
     {
-        return wc;
+        _str = wc;
+        return _str;
     }
 
 #ifdef USING_QT_LIBS
