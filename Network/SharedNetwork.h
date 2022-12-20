@@ -16,6 +16,14 @@
 #include <qstring.h>
 #endif // USING_QTLIB
 
+namespace Shared
+{
+    namespace Network
+    {
+        class CNetwork;
+    }
+}
+
 enum eNetworkType
 {
     NETWORK_NONE = 0,
@@ -32,7 +40,7 @@ typedef struct _stNetworkInfo
 
     eNetworkType                    eType;
 
-    std::thread                     th;
+    Shared::Network::CNetwork*      network;
 
 } tyStNetworkInfo;
 
@@ -43,6 +51,13 @@ namespace Shared
         std::string                                 ValidateIP( const std::string& sIP );
         bool                                        ValidatePort( DWORD dwPort );
 
+        typedef struct _stClientInfo
+        {
+            DWORD                   dwId;
+            ASocket::Socket         connectionClient;
+            std::thread             thServerReceiveThread;
+        } tyStClientInfo;
+
         class CNetwork
         {
         public:
@@ -51,8 +66,12 @@ namespace Shared
             ~CNetwork();
 
             bool                                    Connect();
+
             void                                    ClientReceiveThread();
-            void                                    ClientSendThread();
+            bool                                    ClientSend( XString sMsg );
+
+            void                                    ServerReceiveThread( DWORD dwID, ASocket::Socket connectionClient );
+            void                                    ServerListenThread();
 
         private:
             bool                                    _isStop = false;
@@ -60,7 +79,13 @@ namespace Shared
             tyStNetworkInfo                         _networkInfo;
 
             std::unique_ptr<CTCPClient>             _pTCPClient;
+            std::thread                             _thClientReceiveThread;
+
             std::unique_ptr<CTCPServer>             _pTCPServer;
+            std::thread                             _thServerListenThread;
+            std::map< DWORD, tyStClientInfo >       _mapIdToClientInfo;
+
+            DWORD                                   _dwID = 0;
         };
 
         class CNetworkMgr
@@ -70,10 +95,8 @@ namespace Shared
             CNetworkMgr( tyStNetworkInfo networkInfo );
             ~CNetworkMgr();
 
-            bool                                    Connect();
-            bool                                    Listen();
-
-            void                                    ServerOpen( SOCKADDR_IN serverAddr, SOCKET serverSocket );
+            bool                                          NewConnection( tyStNetworkInfo networkInfo );
+            std::pair< bool, Shared::Network::CNetwork* > GetConnection( XString sName );
 
         private:
 

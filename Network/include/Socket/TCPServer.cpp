@@ -6,10 +6,12 @@
 
 #include "Network/include/Socket/TCPServer.h"
 
+#include "String/SharedXString.h"
+
 CTCPServer::CTCPServer(const LogFnCallback oLogger,
-					   /*const std::string& strAddr,*/
-					   const std::string& strPort,
-					   const SettingsFlag eSettings /*= ALL_FLAGS*/)
+                       /*const std::string& strAddr,*/
+                       const std::string& strPort,
+                       const SettingsFlag eSettings /*= ALL_FLAGS*/)
 					   /*throw (EResolveError)*/ :
 		ASocket(oLogger, eSettings),
 		m_ListenSocket(INVALID_SOCKET),
@@ -380,8 +382,26 @@ int CTCPServer::Receive(const CTCPServer::Socket ClientSocket,
 #endif
 
 	int total = 0;
+	size_t uMaxSize = uSize;
+	// 앞의 4byte는 사이즈로 판단함.
+	{
+		int nSize = recv( ClientSocket, pData + total, 4, 0 );
+
+		if( nSize == 0 )
+			return false;
+
+		XString s( pData );
+
+		if( s.IsEmpty() == false )
+		{
+			if( s.toInt() > 0 )
+				uMaxSize = s.toInt();
+		}
+		total += nSize;
+	}
+
 	do {
-		int nRecvd = recv(ClientSocket, pData + total, uSize - total, 0);
+		int nRecvd = recv( ClientSocket, pData + total, uMaxSize - total, 0 );
 
 		if (nRecvd == 0) {
 			// peer shut down
@@ -408,7 +428,7 @@ int CTCPServer::Receive(const CTCPServer::Socket ClientSocket,
 
 		total += nRecvd;
 
-	} while (bReadFully && (total < uSize));
+	} while( bReadFully && ( total < uMaxSize ) );
 
 	return total;
 }

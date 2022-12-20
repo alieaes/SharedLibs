@@ -2,6 +2,7 @@
 
 #include "String/SharedXString.h"
 
+#include <codecvt>
 #include <Windows.h>
 
 #ifdef USING_QTLIB
@@ -59,6 +60,17 @@ XString XString::toUpper() const
     std::transform( tmp.begin(), tmp.end(), tmp.begin(), towupper );
 
     return tmp;
+}
+
+std::vector<char> XString::toCharByte() const
+{
+    std::wstring tmp = _str;
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+    std::string string = converter.to_bytes( tmp );
+    std::vector< char > ret( string.begin(), string.end() );
+
+    return ret;
 }
 
 bool XString::IsEmpty() const

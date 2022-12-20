@@ -4,7 +4,7 @@
 * @author Mohamed Amine Mzoughi <mohamed-amine.mzoughi@laposte.net>
 */
 
-#include <Socket/Socket.h>
+#include <Network/include/Socket/Socket.h>
 
 #include <iostream>
 #include <vector>

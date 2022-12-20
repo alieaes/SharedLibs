@@ -51,6 +51,11 @@ public:
         _str = std::to_wstring( dw );
     }
 
+    XString( int n )
+    {
+        _str = std::to_wstring( n );
+    }
+
     XString( const std::wstring& ws )
     {
         _str = ws;
@@ -177,6 +182,8 @@ public:
 
     XString                          toLower() const;
     XString                          toUpper() const;
+
+    std::vector< char >              toCharByte() const;
 
     bool                             IsEmpty() const;
 
