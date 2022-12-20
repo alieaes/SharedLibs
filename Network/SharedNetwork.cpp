@@ -3,6 +3,9 @@
 #include "Network/SharedNetwork.h"
 #include "String/SharedString.h"
 
+#include "Network/include/Socket/TCPClient.h"
+#include "Network/include/Socket/TCPServer.h"
+
 #include <regex>
 #include <Windows.h>
 
@@ -10,7 +13,8 @@
 #include <qdatetime.h>
 #endif
 
-#define PACKET_SIZE 1024 * 1024
+#define PACKET_SIZE 1024 * 1024 * 10
+#define PRINT_LOG [](const std::string& strLogMsg) { std::cout << strLogMsg << std::endl;  }
 
 namespace Shared
 {
@@ -51,16 +55,18 @@ namespace Shared
         }
 
         CNetwork::CNetwork()
+            : _pTCPClient( NULLPTR ), _pTCPServer( NULLPTR )
         {
         }
 
-        CNetwork::CNetwork( stNetworkInfo networkInfo )
+        CNetwork::CNetwork( tyStNetworkInfo networkInfo )
         {
-            _networkInfo = networkInfo;
+            _networkInfo = std::move( networkInfo );
         }
 
         CNetwork::~CNetwork()
         {
+            _isStop = true;
         }
 
         bool CNetwork::Connect()
@@ -69,71 +75,93 @@ namespace Shared
 
             do
             {
-            }
-            while( false );
+                if( _networkInfo.eType == NETWORK_CLIENT )
+                {
+                    if( _pTCPClient == NULLPTR )
+                        _pTCPClient.reset( new CTCPClient( PRINT_LOG ) );
+
+                    if( _pTCPClient->IsConnected() == true )
+                        break;
+
+                    if( _pTCPClient->Connect( _networkInfo.sIP, XString( _networkInfo.sPort ) ) == false )
+                    {
+                        //실패 시 로깅 필요
+                        assert( false );
+                        break;
+                    }
+                }
+                else if( _networkInfo.eType == NETWORK_SERVER )
+                {
+                    
+                }
+                else
+                {
+                    
+                }
+
+            } while( false );
 
             return isSuccess;
         }
 
-        bool CNetwork::Listen()
+        void CNetwork::ClientReceiveThread()
+        {
+            while( true )
+            {
+                if( _isStop == true )
+                    break;
+
+                if( _pTCPClient->IsConnected() == false )
+                    break;
+
+                std::vector<char> vecRcvBuf( PACKET_SIZE );
+                int nRcvBytes = _pTCPClient->Receive( vecRcvBuf.data(), PACKET_SIZE );
+
+                if( nRcvBytes > 0 )
+                {
+                    // Success
+                }
+                else if( nRcvBytes == 0 )
+                {
+                    // Connection Close
+                }
+                else
+                {
+                    // Falied..
+                }
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        /// NETWORK MANAGER 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+
+        CNetworkMgr::CNetworkMgr()
+        {
+        }
+
+        CNetworkMgr::CNetworkMgr( tyStNetworkInfo networkInfo )
+        {
+            if( networkInfo.sName.empty() == true )
+                return;
+
+            _mapNameToNetworkInfo[ networkInfo.sName ] = std::move( networkInfo );
+        }
+
+        CNetworkMgr::~CNetworkMgr()
+        {
+        }
+
+        bool CNetworkMgr::Connect()
         {
             bool isSuccess = false;
 
             do
             {
-                if( _networkInfo.eType != NETWORK_SERVER )
-                    break;
-
-                WSADATA wsaData;
-
-                if( WSAStartup( MAKEWORD( 2, 2 ), &wsaData ) != 0 )
-                    break;
-
-                SOCKET serverSocket;
-
-                serverSocket = socket( PF_INET, SOCK_STREAM, 0 );
-
-                SOCKADDR_IN serverAddr;
-                memset( &serverAddr, 0, sizeof( serverAddr ) );
-
-                serverAddr.sin_family = AF_INET;
-                serverAddr.sin_addr.s_addr = htonl( INADDR_ANY );
-                serverAddr.sin_port = _networkInfo.sPort;
-
-                if( bind( serverSocket, ( sockaddr* )&serverAddr, sizeof( serverAddr ) ) == SOCKET_ERROR )
-                    break;
-
-                if( listen( serverSocket, SOMAXCONN ) == SOCKET_ERROR )
-                    break;
-
-                _vecthServer.push_back( std::thread( std::bind( &CNetwork::ServerOpen, this, serverAddr, serverSocket ) ) );
-                isSuccess = true;
             }
             while( false );
 
             return isSuccess;
-        }
-
-        void CNetwork::ServerOpen( SOCKADDR_IN serverAddr, SOCKET serverSocket )
-        {
-            while( true )
-            {
-                SOCKADDR_IN client_addr;
-
-                int client_addr_size = sizeof( serverAddr );
-                int nClientSock = accept( serverSocket, ( sockaddr* )&client_addr, &client_addr_size );
-
-                if( nClientSock == SOCKET_ERROR )
-                    break;
-
-                static char cBuffer[ PACKET_SIZE ];
-                if( recv( nClientSock, cBuffer, PACKET_SIZE, 0 ) == SOCKET_ERROR )
-                {
-                    SleepEx( 1, TRUE );
-                    continue;
-                }
-
-            }
         }
     }
 }

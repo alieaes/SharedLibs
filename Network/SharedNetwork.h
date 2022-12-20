@@ -7,6 +7,11 @@
 
 #include "SharedBase.h"
 
+#include "Network/include/Socket/TCPClient.h"
+#include "Network/include/Socket/TCPServer.h"
+
+#include "String/SharedXString.h"
+
 #ifdef USING_QTLIB
 #include <qstring.h>
 #endif // USING_QTLIB
@@ -20,19 +25,16 @@ enum eNetworkType
 
 typedef struct _stNetworkInfo
 {
-    std::wstring                    sIP;
+    XString                         sIP;
     DWORD                           sPort;
 
-    std::wstring                    sName;
+    XString                         sName;
 
     eNetworkType                    eType;
 
-    _stNetworkInfo()
-    {
-        sPort = 0;
-        eType = NETWORK_NONE;
-    }
-} stNetworkInfo;
+    std::thread                     th;
+
+} tyStNetworkInfo;
 
 namespace Shared
 {
@@ -45,8 +47,28 @@ namespace Shared
         {
         public:
             CNetwork();
-            CNetwork( stNetworkInfo networkInfo );
+            CNetwork( tyStNetworkInfo networkInfo );
             ~CNetwork();
+
+            bool                                    Connect();
+            void                                    ClientReceiveThread();
+            void                                    ClientSendThread();
+
+        private:
+            bool                                    _isStop = false;
+
+            tyStNetworkInfo                         _networkInfo;
+
+            std::unique_ptr<CTCPClient>             _pTCPClient;
+            std::unique_ptr<CTCPServer>             _pTCPServer;
+        };
+
+        class CNetworkMgr
+        {
+        public:
+            CNetworkMgr();
+            CNetworkMgr( tyStNetworkInfo networkInfo );
+            ~CNetworkMgr();
 
             bool                                    Connect();
             bool                                    Listen();
@@ -54,7 +76,8 @@ namespace Shared
             void                                    ServerOpen( SOCKADDR_IN serverAddr, SOCKET serverSocket );
 
         private:
-            stNetworkInfo                           _networkInfo;
+
+            std::map< XString, tyStNetworkInfo >    _mapNameToNetworkInfo;
 
             std::vector< std::thread >              _vecthServer;
             SOCKADDR_IN                             _serverAddr;
@@ -62,6 +85,6 @@ namespace Shared
     }
 }
 
-typedef Shared::Singletons::Singleton<Shared::Network::CNetwork> TyStNetwork;
+typedef Shared::Singletons::Singleton<Shared::Network::CNetworkMgr> TyStNetworkMgr;
 
 #endif
