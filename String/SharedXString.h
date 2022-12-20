@@ -46,6 +46,11 @@ public:
         _str = std::wstring( s.begin(), s.end() );
     }
 
+    XString( DWORD dw )
+    {
+        _str = std::to_wstring( dw );
+    }
+
     XString( const std::wstring& ws )
     {
         _str = ws;
