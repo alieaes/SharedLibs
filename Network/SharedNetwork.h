@@ -80,7 +80,7 @@ namespace Shared
         private:
 
             tuPacketMsg                             convertReceiveMsg( std::vector<char> vecChar );
-            XString                                 convertSendMsg( XString sMsg, MSGID msgID );
+            std::vector<char>                       convertSendMsg( XString sMsg, MSGID msgID );
 
             bool                                    _isStop = false;
 

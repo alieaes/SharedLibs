@@ -6,8 +6,6 @@
 
 #include "Network/include/Socket/TCPClient.h"
 
-#include "String/SharedXString.h"
-
 CTCPClient::CTCPClient(const LogFnCallback oLogger,
                        const SettingsFlag eSettings /*= ALL_FLAGS*/) :
    ASocket(oLogger, eSettings),
@@ -358,13 +356,18 @@ int CTCPClient::Receive(char* pData, const size_t uSize, bool bReadFully /*= tru
        if( nSize == 0 )
            return false;
 
-       XString s( pData );
+       std::vector< char > vecChar;
 
-       if( s.IsEmpty() == false )
-       {
-           if( s.toInt() > 0 )
-               uMaxSize = s.toInt();
-       }
+       for( int idx = 0; idx < 4; idx++ )
+           vecChar.push_back( pData[ idx ] );
+
+       unsigned int nTotalSize = vecChar[ 0 ];
+       nTotalSize = ( nTotalSize << 8 ) | vecChar[ 1 ];
+       nTotalSize = ( nTotalSize << 8 ) | vecChar[ 2 ];
+       nTotalSize = ( nTotalSize << 8 ) | vecChar[ 3 ];
+
+		if( nTotalSize > 0 )
+			uMaxSize = nTotalSize;
        total += nSize;
    }
 

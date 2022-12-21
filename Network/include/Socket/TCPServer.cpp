@@ -6,8 +6,6 @@
 
 #include "Network/include/Socket/TCPServer.h"
 
-#include "String/SharedXString.h"
-
 CTCPServer::CTCPServer(const LogFnCallback oLogger,
                        /*const std::string& strAddr,*/
                        const std::string& strPort,
@@ -390,13 +388,19 @@ int CTCPServer::Receive(const CTCPServer::Socket ClientSocket,
 		if( nSize == 0 )
 			return false;
 
-		XString s( pData );
+		std::vector< char > vecChar;
 
-		if( s.IsEmpty() == false )
-		{
-			if( s.toInt() > 0 )
-				uMaxSize = s.toInt();
-		}
+		for( int idx =0; idx < 4; idx++ )
+			vecChar.push_back( pData[ idx ] );
+
+		unsigned int nTotalSize = vecChar[ 0 ];
+		nTotalSize = ( nTotalSize << 8 ) | vecChar[ 1 ];
+		nTotalSize = ( nTotalSize << 8 ) | vecChar[ 2 ];
+		nTotalSize = ( nTotalSize << 8 ) | vecChar[ 3 ];
+
+		if( nTotalSize > 0 )
+			uMaxSize = nTotalSize;
+
 		total += nSize;
 	}
 

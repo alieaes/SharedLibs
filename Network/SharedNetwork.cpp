@@ -153,9 +153,9 @@ namespace Shared
                 if( _pTCPClient->IsConnected() == false )
                     break;
 
-                XString sSend = convertSendMsg( sMsg, _msgID );
+                auto sSend = convertSendMsg( sMsg, _msgID );
 
-                prRet.first = _pTCPClient->Send( sSend.toString() );
+                prRet.first = _pTCPClient->Send( sSend );
 
                 if( prRet.first == true )
                     _msgID++;
@@ -230,12 +230,12 @@ namespace Shared
                 if( _pTCPClient->IsConnected() == false )
                     break;
 
-                XString sSend = convertSendMsg( sMsg, 0 );
+                auto sSend = convertSendMsg( sMsg, 0 );
 
                 for( auto it = _mapIdToClientInfo.begin(); it != _mapIdToClientInfo.end(); ++it )
                 {
                     // 전체가 성공 했을 때만 성공으로 봐야 하는가? 일부 성공을 분리해야 하는가?
-                    isSuccess = _pTCPServer->Send( it->second.connectionClient, sSend.toString() );
+                    isSuccess = _pTCPServer->Send( it->second.connectionClient, sSend );
                 }
             } while( false );
 
@@ -247,44 +247,57 @@ namespace Shared
             tuPacketMsg packetMsg = std::make_tuple( 0, 0, XString() );
 
             {
-                XString sSize;
+                std::vector<char> vecTmp;
                 // 앞 4byte는 사이즈로 판단하기 때문에 삭제하도록 함.
                 for( int idx = 0; idx < 4; idx++ )
                 {
-                    sSize += vecChar.at( 0 );
+                    vecTmp.push_back( vecChar.at( 0 ) );
                     vecChar.erase( vecChar.begin() + 0 );
                 }
 
-                std::get<0>( packetMsg ) = sSize.toInt();
+                unsigned int nSize = vecTmp[ 0 ];
+                nSize = ( nSize << 8 ) | vecTmp[ 1 ];
+                nSize = ( nSize << 8 ) | vecTmp[ 2 ];
+                nSize = ( nSize << 8 ) | vecTmp[ 3 ];
+
+                std::get<0>( packetMsg ) = nSize;
             }
 
             {
-                XString sSize;
+                std::vector<char> vecTmp;
                 // 그 뒤 4byte는 msgID로 관리하기 때문에 동일하게 삭제하도록 함.
                 for( int idx = 0; idx < 4; idx++ )
                 {
-                    sSize += vecChar.at( 0 );
+                    vecTmp.push_back( vecChar.at( 0 ) );
                     vecChar.erase( vecChar.begin() + 0 );
                 }
 
-                std::get<1>( packetMsg ) = sSize.toInt();
+                unsigned int nSize = vecTmp[ 0 ];
+                nSize = ( nSize << 8 ) | vecTmp[ 1 ];
+                nSize = ( nSize << 8 ) | vecTmp[ 2 ];
+                nSize = ( nSize << 8 ) | vecTmp[ 3 ];
+
+                std::get<1>( packetMsg ) = nSize;
             }
 
-            std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-            std::get<2>( packetMsg ) = converter.from_bytes( vecChar.data(), vecChar.data() + vecChar.size() );
+            std::get<2>( packetMsg ) = String::s2ws( vecChar.data() );
 
             return packetMsg;
         }
 
-        XString CNetwork::convertSendMsg( XString sMsg, MSGID msgID )
+        std::vector<char> CNetwork::convertSendMsg( XString sMsg, MSGID msgID )
         {
             XString sRet;
 
             char cSize[ 4 ];
+            std::vector<char> vecChar;
 
             {
-                unsigned int nMsgSize = htonl( sMsg.size() );
+                unsigned int nMsgSize = htonl( sMsg.size() + 8 );
                 memcpy( cSize, &nMsgSize, 4 );
+
+                for( int idx = 0; idx < 4; idx++ )
+                    vecChar.push_back( cSize[ idx ] );
             }
             
             char cIDSize[ 4 ];
@@ -292,15 +305,14 @@ namespace Shared
             {
                 unsigned int nID = htonl( msgID );
                 memcpy( cIDSize, &nID, 4 );
+
+                for( int idx = 0; idx < 4; idx++ )
+                    vecChar.push_back( cIDSize[ idx ] );
             }
 
-
-            // TODO : 이부분 너무 비효율적임. 수정 필요.
-            sRet = XString( cSize[ 0 ] ) + XString( cSize[ 1 ] ) + XString( cSize[ 2 ] ) + XString( cSize[ 3 ] )
-                + XString( cIDSize[ 0 ] ) + XString( cIDSize[ 1 ] ) + XString( cIDSize[ 2 ] ) + XString( cIDSize[ 3 ] )
-                + sMsg;
-
-            return sRet;
+            auto vecMsg = sMsg.toCharByte();
+            vecChar.insert( vecChar.end(), vecMsg.begin(), vecMsg.end() );
+            return vecChar;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////

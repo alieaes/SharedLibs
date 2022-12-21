@@ -160,6 +160,12 @@ public:
         return _str;
     }
 
+    XString operator += ( std::string& s )
+    {
+        _str += std::wstring( s.begin(), s.end() );
+        return _str;
+    }
+
     XString operator +( std::wstring& xs )
     {
         _str += xs;
