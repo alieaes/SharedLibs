@@ -165,8 +165,19 @@ namespace Shared
             return prRet;
         }
 
+        void CNetwork::RegisterServerHandler( funcHandler func )
+        {
+            _serverFunc = func;
+        }
+
         void CNetwork::ServerReceiveThread( DWORD dwID, ASocket::Socket connectionClient )
         {
+            CNetworkServerHandler* serverHandler = new CNetworkServerHandler();
+
+            serverHandler->RegisterHandler( _serverFunc );
+            serverHandler->SetSocket( connectionClient );
+            serverHandler->Start();
+
             while( true )
             {
                 if( _isStop == true )
@@ -180,12 +191,15 @@ namespace Shared
                     // Success
 
                     auto tuPacket = convertReceiveMsg( vecRcvBuf );
+
+                    serverHandler->InsertPacket( tuPacket );
                 }
                 else if( nRcvBytes == 0 )
                 {
                     // Connection Close
 
                     _pTCPServer->Disconnect( connectionClient );
+                    serverHandler->End();
                     break;
                 }
                 else
@@ -316,9 +330,73 @@ namespace Shared
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
-        /// NETWORK MANAGER 
+        /// NETWORK SERVER HANDLER 
         ////////////////////////////////////////////////////////////////////////////////////////////
 
+        CNetworkServerHandler::CNetworkServerHandler()
+        {
+        }
+
+        CNetworkServerHandler::~CNetworkServerHandler()
+        {
+            _isStop = true;
+        }
+
+        void CNetworkServerHandler::SetSocket( ASocket::Socket connectionClient )
+        {
+            _connectionClient = connectionClient;
+        }
+
+        void CNetworkServerHandler::RegisterHandler( funcHandler func )
+        {
+            _func = func;
+        }
+
+        void CNetworkServerHandler::InsertPacket( tuPacketMsg packet )
+        {
+            std::lock_guard<std::recursive_mutex> lck( _lck );
+            _queuePacket.push( packet );
+        }
+
+        void CNetworkServerHandler::Start()
+        {
+            _th = std::thread( std::bind( &CNetworkServerHandler::Main, this ) );
+        }
+
+        void CNetworkServerHandler::End()
+        {
+            _isStop = true;
+            _th.join();
+        }
+
+        void CNetworkServerHandler::Main()
+        {
+            while( _isStop == false )
+            {
+                tuPacketMsg tuPacket;
+                {
+                    std::lock_guard<std::recursive_mutex> lck( _lck );
+
+                    if( _queuePacket.size() == 0 )
+                    {
+                        Sleep( 5 );
+                        continue;
+                    }
+
+                    tuPacket = _queuePacket.front();
+
+                    _queuePacket.pop();
+                }
+
+                if( _func != NULLPTR )
+                    _func( _connectionClient, tuPacket );
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        /// NETWORK MANAGER 
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        ///
         CNetworkMgr::CNetworkMgr()
         {
         }

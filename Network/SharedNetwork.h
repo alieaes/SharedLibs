@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <queue>
 #include <string>
 
 #include "SharedBase.h"
@@ -26,6 +27,7 @@ namespace Shared
 
 typedef unsigned int MSGID;
 typedef std::tuple< int, MSGID, XString > tuPacketMsg;
+typedef std::function<void( ASocket::Socket, tuPacketMsg )> funcHandler;
 
 enum eNetworkType
 {
@@ -73,14 +75,16 @@ namespace Shared
             void                                    ClientReceiveThread();
             std::pair< bool, MSGID >                ClientSend( XString sMsg );
 
+            void                                    RegisterServerHandler( funcHandler func );
             void                                    ServerReceiveThread( DWORD dwID, ASocket::Socket connectionClient );
             void                                    ServerListenThread();
             bool                                    ServerAllClientSend( XString sMsg );
 
         private:
-
             tuPacketMsg                             convertReceiveMsg( std::vector<char> vecChar );
             std::vector<char>                       convertSendMsg( XString sMsg, MSGID msgID );
+
+            funcHandler                             _serverFunc;
 
             bool                                    _isStop = false;
 
@@ -96,6 +100,31 @@ namespace Shared
 
             DWORD                                   _dwID = 0;
             MSGID                                   _msgID = 0;
+        };
+
+        class CNetworkServerHandler
+        {
+        public:
+            CNetworkServerHandler();
+            ~CNetworkServerHandler();
+
+            void                                    SetSocket( ASocket::Socket connectionClient );
+            void                                    RegisterHandler( funcHandler func );
+            void                                    InsertPacket( tuPacketMsg packet );
+
+            void                                    Start();
+            void                                    End();
+
+            void                                    Main();
+        private:
+
+            bool                                    _isStop = false;
+
+            std::recursive_mutex                    _lck;
+            std::thread                             _th;
+            std::queue< tuPacketMsg >               _queuePacket;
+            ASocket::Socket                         _connectionClient;
+            funcHandler                             _func;
         };
 
         class CNetworkMgr
