@@ -291,9 +291,10 @@ namespace Shared
 
             char cSize[ 4 ];
             std::vector<char> vecChar;
+            auto vecMsg = sMsg.toCharByte();
 
             {
-                unsigned int nMsgSize = htonl( sMsg.size() + 8 );
+                unsigned int nMsgSize = htonl( vecMsg.size() + 8 );
                 memcpy( cSize, &nMsgSize, 4 );
 
                 for( int idx = 0; idx < 4; idx++ )
@@ -310,7 +311,6 @@ namespace Shared
                     vecChar.push_back( cIDSize[ idx ] );
             }
 
-            auto vecMsg = sMsg.toCharByte();
             vecChar.insert( vecChar.end(), vecMsg.begin(), vecMsg.end() );
             return vecChar;
         }
