@@ -1,10 +1,12 @@
-/**
+﻿/**
 * @file TCPClient.cpp
 * @brief implementation of the TCP client class
 * @author Mohamed Amine Mzoughi <mohamed-amine.mzoughi@laposte.net>
 */
 
 #include "Network/include/Socket/TCPClient.h"
+
+#include "String/SharedXString.h"
 
 CTCPClient::CTCPClient(const LogFnCallback oLogger,
                        const SettingsFlag eSettings /*= ALL_FLAGS*/) :
@@ -348,9 +350,37 @@ int CTCPClient::Receive(char* pData, const size_t uSize, bool bReadFully /*= tru
    #endif
 
    int total = 0;
+   size_t uMaxSize = uSize;
+   // 앞의 4byte는 사이즈로 판단함.
+   {
+       int nSize = recv( m_ConnectSocket, pData + total, 4, 0 );
+
+       if( nSize == 0 )
+           return false;
+
+       XString s( pData );
+
+       if( s.IsEmpty() == false )
+       {
+           if( s.toInt() > 0 )
+               uMaxSize = s.toInt();
+       }
+       total += nSize;
+   }
+
+    // 그 뒤 4byte는 메세지 식별자 값으로 사용함
+   {
+       int nSize = recv( m_ConnectSocket, pData + total, 4, 0 );
+
+       if( nSize == 0 )
+           return false;
+
+       total += nSize;
+   }
+
    do
    {
-      int nRecvd = recv(m_ConnectSocket, pData + total, uSize - total, 0);
+       int nRecvd = recv( m_ConnectSocket, pData + total, uMaxSize - total, 0 );
 
       if (nRecvd == 0)
       {
@@ -378,7 +408,7 @@ int CTCPClient::Receive(char* pData, const size_t uSize, bool bReadFully /*= tru
 
       total += nRecvd;
 
-   } while (bReadFully && (total < uSize));
+   } while( bReadFully && ( total < uMaxSize ) );
    
    return total;
 }

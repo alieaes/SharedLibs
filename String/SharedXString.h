@@ -148,6 +148,18 @@ public:
         return _str;
     }
 
+    XString operator +=( char c )
+    {
+        _str += std::to_wstring( c );
+        return _str;
+    }
+
+    XString operator +=( const char* c )
+    {
+        _str += Shared::String::s2ws( c );
+        return _str;
+    }
+
     XString operator +( std::wstring& xs )
     {
         _str += xs;

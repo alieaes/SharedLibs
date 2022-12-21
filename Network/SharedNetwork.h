@@ -24,6 +24,9 @@ namespace Shared
     }
 }
 
+typedef unsigned int MSGID;
+typedef std::tuple< int, MSGID, XString > tuPacketMsg;
+
 enum eNetworkType
 {
     NETWORK_NONE = 0,
@@ -68,24 +71,31 @@ namespace Shared
             bool                                    Connect();
 
             void                                    ClientReceiveThread();
-            bool                                    ClientSend( XString sMsg );
+            std::pair< bool, MSGID >                ClientSend( XString sMsg );
 
             void                                    ServerReceiveThread( DWORD dwID, ASocket::Socket connectionClient );
             void                                    ServerListenThread();
+            bool                                    ServerAllClientSend( XString sMsg );
 
         private:
+
+            tuPacketMsg                             convertReceiveMsg( std::vector<char> vecChar );
+            XString                                 convertSendMsg( XString sMsg, MSGID msgID );
+
             bool                                    _isStop = false;
 
             tyStNetworkInfo                         _networkInfo;
 
             std::unique_ptr<CTCPClient>             _pTCPClient;
             std::thread                             _thClientReceiveThread;
+            std::map< MSGID, XString >              _mapMsgIDToMSG;
 
             std::unique_ptr<CTCPServer>             _pTCPServer;
             std::thread                             _thServerListenThread;
             std::map< DWORD, tyStClientInfo >       _mapIdToClientInfo;
 
             DWORD                                   _dwID = 0;
+            MSGID                                   _msgID = 0;
         };
 
         class CNetworkMgr

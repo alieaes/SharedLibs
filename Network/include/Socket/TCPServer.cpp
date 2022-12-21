@@ -400,7 +400,18 @@ int CTCPServer::Receive(const CTCPServer::Socket ClientSocket,
 		total += nSize;
 	}
 
-	do {
+	// 그 뒤 4byte는 메세지 식별자 값으로 사용함
+	{
+		int nSize = recv( ClientSocket, pData + total, 4, 0 );
+
+		if( nSize == 0 )
+			return false;
+
+		total += nSize;
+	}
+
+	do
+	{
 		int nRecvd = recv( ClientSocket, pData + total, uMaxSize - total, 0 );
 
 		if (nRecvd == 0) {

@@ -129,6 +129,9 @@ namespace Shared
                 if( nRcvBytes > 0 )
                 {
                     // Success
+
+                    auto tuPacket = convertReceiveMsg( vecRcvBuf );
+                    _mapMsgIDToMSG[ std::get<1>( tuPacket ) ] = std::get<2>( tuPacket );
                 }
                 else if( nRcvBytes == 0 )
                 {
@@ -141,26 +144,25 @@ namespace Shared
             }
         }
 
-        bool CNetwork::ClientSend( XString sMsg )
+        std::pair< bool, MSGID > CNetwork::ClientSend( XString sMsg )
         {
-            bool isSuccess = false;
+            std::pair< bool, MSGID > prRet = std::make_pair( false, 0 );
 
             do
             {
                 if( _pTCPClient->IsConnected() == false )
                     break;
 
-                unsigned int number2 = htonl( sMsg.size() );
-                char numberStr[ 4 ];
-                memcpy( numberStr, &number2, 4 );
+                XString sSend = convertSendMsg( sMsg, _msgID );
 
-                // TODO : 이부분 너무 비효율적임. 수정 필요.
-                XString sSend = XString( numberStr[ 0 ] ) + XString( numberStr[ 1 ] ) + XString( numberStr[ 2 ] ) + XString( numberStr[ 3 ] ) + sMsg;
-                isSuccess = _pTCPClient->Send( sSend.toString() );
+                prRet.first = _pTCPClient->Send( sSend.toString() );
+
+                if( prRet.first == true )
+                    _msgID++;
             }
             while( false );
 
-            return isSuccess;
+            return prRet;
         }
 
         void CNetwork::ServerReceiveThread( DWORD dwID, ASocket::Socket connectionClient )
@@ -175,17 +177,16 @@ namespace Shared
 
                 if( nRcvBytes > 0 )
                 {
-                    // 앞 4byte는 사이즈로 판단하기 때문에 삭제하도록 함.
-                    for( int idx = 0; idx < 4; idx++ )
-                        vecRcvBuf.erase( vecRcvBuf.begin() + 0 );
-
-                    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-                    XString sRet = converter.from_bytes( vecRcvBuf.data(), vecRcvBuf.data() + vecRcvBuf.size() );
                     // Success
+
+                    auto tuPacket = convertReceiveMsg( vecRcvBuf );
                 }
                 else if( nRcvBytes == 0 )
                 {
                     // Connection Close
+
+                    _pTCPServer->Disconnect( connectionClient );
+                    break;
                 }
                 else
                 {
@@ -218,6 +219,88 @@ namespace Shared
                     _mapIdToClientInfo[ _dwID ] = std::move( stClientInfo );
                 }
             }
+        }
+
+        bool CNetwork::ServerAllClientSend( XString sMsg )
+        {
+            bool isSuccess = false;
+
+            do
+            {
+                if( _pTCPClient->IsConnected() == false )
+                    break;
+
+                XString sSend = convertSendMsg( sMsg, 0 );
+
+                for( auto it = _mapIdToClientInfo.begin(); it != _mapIdToClientInfo.end(); ++it )
+                {
+                    // 전체가 성공 했을 때만 성공으로 봐야 하는가? 일부 성공을 분리해야 하는가?
+                    isSuccess = _pTCPServer->Send( it->second.connectionClient, sSend.toString() );
+                }
+            } while( false );
+
+            return isSuccess;
+        }
+
+        tuPacketMsg CNetwork::convertReceiveMsg( std::vector<char> vecChar )
+        {
+            tuPacketMsg packetMsg = std::make_tuple( 0, 0, XString() );
+
+            {
+                XString sSize;
+                // 앞 4byte는 사이즈로 판단하기 때문에 삭제하도록 함.
+                for( int idx = 0; idx < 4; idx++ )
+                {
+                    sSize += vecChar.at( 0 );
+                    vecChar.erase( vecChar.begin() + 0 );
+                }
+
+                std::get<0>( packetMsg ) = sSize.toInt();
+            }
+
+            {
+                XString sSize;
+                // 그 뒤 4byte는 msgID로 관리하기 때문에 동일하게 삭제하도록 함.
+                for( int idx = 0; idx < 4; idx++ )
+                {
+                    sSize += vecChar.at( 0 );
+                    vecChar.erase( vecChar.begin() + 0 );
+                }
+
+                std::get<1>( packetMsg ) = sSize.toInt();
+            }
+
+            std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+            std::get<2>( packetMsg ) = converter.from_bytes( vecChar.data(), vecChar.data() + vecChar.size() );
+
+            return packetMsg;
+        }
+
+        XString CNetwork::convertSendMsg( XString sMsg, MSGID msgID )
+        {
+            XString sRet;
+
+            char cSize[ 4 ];
+
+            {
+                unsigned int nMsgSize = htonl( sMsg.size() );
+                memcpy( cSize, &nMsgSize, 4 );
+            }
+            
+            char cIDSize[ 4 ];
+
+            {
+                unsigned int nID = htonl( msgID );
+                memcpy( cIDSize, &nID, 4 );
+            }
+
+
+            // TODO : 이부분 너무 비효율적임. 수정 필요.
+            sRet = XString( cSize[ 0 ] ) + XString( cSize[ 1 ] ) + XString( cSize[ 2 ] ) + XString( cSize[ 3 ] )
+                + XString( cIDSize[ 0 ] ) + XString( cIDSize[ 1 ] ) + XString( cIDSize[ 2 ] ) + XString( cIDSize[ 3 ] )
+                + sMsg;
+
+            return sRet;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////
