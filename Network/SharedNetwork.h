@@ -26,6 +26,8 @@ namespace Shared
 }
 
 typedef unsigned int MSGID;
+typedef unsigned int TIME_MS;
+
 typedef std::tuple< int, MSGID, XString > tuPacketMsg;
 typedef std::function<void( ASocket::Socket, tuPacketMsg )> funcHandler;
 
@@ -74,9 +76,11 @@ namespace Shared
 
             void                                    ClientReceiveThread();
             std::pair< bool, MSGID >                ClientSend( XString sMsg );
+            std::pair< bool, XString >              ClientReceiveWait( MSGID msgID, TIME_MS timeoutMs = 20 * 1000 );
 
             void                                    RegisterServerHandler( funcHandler func );
             void                                    ServerReceiveThread( DWORD dwID, ASocket::Socket connectionClient );
+            std::pair< bool, MSGID >                ServerSend( ASocket::Socket connectionClient, XString sMsg );
             void                                    ServerListenThread();
             bool                                    ServerAllClientSend( XString sMsg );
 

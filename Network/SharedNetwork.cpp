@@ -89,7 +89,6 @@ namespace Shared
                     if( _pTCPClient->Connect( _networkInfo.sIP, XString( _networkInfo.sPort ) ) == false )
                     {
                         //실패 시 로깅 필요
-                        assert( false );
                         break;
                     }
 
@@ -107,6 +106,8 @@ namespace Shared
                 {
                     
                 }
+
+                isSuccess = true;
 
             } while( false );
 
@@ -165,6 +166,40 @@ namespace Shared
             return prRet;
         }
 
+        std::pair<bool, XString> CNetwork::ClientReceiveWait( MSGID msgID, TIME_MS timeoutMs /*= 20 * 1000*/ )
+        {
+            std::pair< bool, XString > prResult = std::make_pair( false, XString() );
+
+            TIME_MS ms = timeoutMs;
+
+            // 타임아웃의 최소치는 10초로 함.
+            if( ms < 10 * 1000 )
+                ms = 10 * 1000;
+
+            TIME_MS sleepMs = ms / 1000;
+            TIME_MS timeout = 1000;
+            int nTryCnt = 0;
+
+            do
+            {
+                while( prResult.first == false &&  nTryCnt++ < timeout )
+                {
+                    if( _mapMsgIDToMSG.count( msgID ) > 0 )
+                    {
+                        prResult.first = true;
+                        prResult.second = _mapMsgIDToMSG[ msgID ];
+                        _mapMsgIDToMSG.erase( msgID );
+                        break;
+                    }
+
+                    Sleep( sleepMs );
+                }
+            }
+            while( false );
+
+            return prResult;
+        }
+
         void CNetwork::RegisterServerHandler( funcHandler func )
         {
             _serverFunc = func;
@@ -207,6 +242,27 @@ namespace Shared
                     // Falied..
                 }
             }
+        }
+
+        std::pair< bool, MSGID > CNetwork::ServerSend( ASocket::Socket connectionClient, XString sMsg )
+        {
+            std::pair< bool, MSGID > prRet = std::make_pair( false, 0 );
+
+            do
+            {
+                if( _pTCPClient->IsConnected() == false )
+                    break;
+
+                auto sSend = convertSendMsg( sMsg, _msgID );
+
+                prRet.first = _pTCPClient->Send( sSend );
+
+                if( prRet.first == true )
+                    _msgID++;
+
+            } while( false );
+
+            return prRet;
         }
 
         void CNetwork::ServerListenThread()
