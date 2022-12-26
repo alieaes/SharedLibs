@@ -39,5 +39,48 @@ namespace Shared
 
             return sRet;
         }
+
+        VERSION_CHECK VersionCheck( XString sCurrentVersion, XString sNextVersion )
+        {
+            VERSION_CHECK eVersion = VERSION_UNKNOWN;
+
+            auto vecCurrent = sCurrentVersion.split( "." );
+            auto vecNext = sNextVersion.split( "." );
+
+            do
+            {
+                if( vecCurrent.size() != vecNext.size() )
+                {
+                    eVersion = VERSION_UNMATCH;
+                    break;
+                }
+
+                for( int idx = 0; idx < vecCurrent.size(); idx++ )
+                {
+                    if( vecCurrent[ idx ] == vecNext[ idx ] )
+                    {
+                        eVersion = VERSION_EQUAL;
+                    }
+                    else if( vecCurrent[ idx ] > vecNext[ idx ] )
+                    {
+                        eVersion = VERISON_LOWER;
+                        break;
+                    }
+                    else if( vecCurrent[ idx ] < vecNext[ idx ] )
+                    {
+                        eVersion = VERSION_HIGHER;
+                        break;
+                    }
+                    else
+                    {
+                        eVersion = VERSION_UNKNOWN;
+                        break;
+                    }
+                }
+            }
+            while( false );
+
+            return eVersion;
+        }
     }
 }

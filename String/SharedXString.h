@@ -63,7 +63,9 @@ public:
 
     XString( const std::string& s )
     {
-        _str = std::wstring( s.begin(), s.end() );
+        _str = Shared::String::s2ws( s );
+        if( _str.empty() == false )
+            _str.pop_back();
     }
 
 #ifdef USING_QT_LIBS
@@ -212,10 +214,14 @@ public:
     XString                          substr( int nSrc, int nDst ) const;
 
     int                              find_last_of( XString xs ) const;
+    int                              find( XString xs ) const;
 
     const wchar_t*                   c_str() const;
 
     std::wstring                     string() { return _str; }
+
+    std::vector< XString >           split( const XString& sSplit ) const;
+
 protected:
 
 private:

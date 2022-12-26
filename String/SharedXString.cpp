@@ -116,7 +116,30 @@ int XString::find_last_of( XString xs ) const
     return _str.find_last_of( xs );
 }
 
+int XString::find( XString xs ) const
+{
+    return _str.find( xs );
+}
+
 const wchar_t* XString::c_str() const
 {
     return _str.c_str();
+}
+
+std::vector<XString> XString::split( const XString& sSplit ) const
+{
+    std::wstring tmp = _str;
+    std::vector<XString> vecList;
+    std::string::size_type st = tmp.find( sSplit );
+    std::string::size_type nCurrent = 0;
+
+    while( st != std::string::npos )
+    {
+        vecList.push_back( tmp.substr( nCurrent, st - nCurrent ) );
+
+        nCurrent = st + 1;
+        st = tmp.find( sSplit, st + 1 );
+    }
+
+    return vecList;
 }

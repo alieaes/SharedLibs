@@ -17,7 +17,18 @@ namespace Shared
 {
     namespace Utils
     {
+        typedef enum _tyVersionCheck
+        {
+            VERSION_UNKNOWN = 0,
+            VERSION_EQUAL   = 1,
+            VERISON_LOWER   = 2,
+            VERSION_HIGHER  = 3,
+            VERSION_UNMATCH = 4
+        } VERSION_CHECK;
+
         XString                 CreateUUID( bool bUpper = true );
+
+        VERSION_CHECK           VersionCheck( XString sCurrentVersion, XString sNextVersion );
     }
 }
 
