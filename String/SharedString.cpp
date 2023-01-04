@@ -2,6 +2,7 @@
 
 #include "String/SharedString.h"
 
+#include <codecvt>
 #include <Windows.h>
 
 #ifdef USING_QTLIB
@@ -55,6 +56,18 @@ namespace Shared
             WideCharToMultiByte( CP_UTF8, 0, &wc[ 0 ], -1, c, size_needed, NULL, NULL );
 
             return c;
+        }
+
+        std::wstring u82ws( const std::string& utf8 )
+        {
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> wcu8;
+            return wcu8.from_bytes( utf8 );
+        }
+
+        std::string ws2u8( const std::wstring& utf16 )
+        {
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> wcu8;
+            return wcu8.to_bytes( utf16 );
         }
 
         bool EndsWith( const std::string& sFullString, const std::string& sEnds )

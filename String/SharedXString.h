@@ -68,6 +68,11 @@ public:
             _str.pop_back();
     }
 
+    XString( const std::wstringstream& ws )
+    {
+        _str = ws.rdbuf()->str();
+    }
+
 #ifdef USING_QT_LIBS
     XString( const QString& qs )
     {
@@ -123,6 +128,12 @@ public:
     XString operator = ( const XString& wc )         // XString xs = L"TEST";
     {
         _str = wc;
+        return _str;
+    }
+
+    XString operator = ( const std::wstringstream& ws )
+    {
+        _str = ws.rdbuf()->str();
         return _str;
     }
 
