@@ -19,7 +19,7 @@ namespace Shared
 {
     namespace File
     {
-        XString GetCurrentPath( bool bIncludeSeparator )
+        XString GetCurrentPath( bool bIncludeSeparator /*= false*/ )
         {
             std::wstring ret;
             wchar_t result[ MAX_PATH ];
