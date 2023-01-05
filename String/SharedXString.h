@@ -233,6 +233,8 @@ public:
 
     std::vector< XString >           split( const XString& sSplit ) const;
 
+    XString                          replace( const XString& xa, const XString& xb );
+
 protected:
 
 private:

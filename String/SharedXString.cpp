@@ -143,3 +143,13 @@ std::vector<XString> XString::split( const XString& sSplit ) const
 
     return vecList;
 }
+
+XString XString::replace( const XString& xa, const XString& xb )
+{
+    std::wstring tmp = _str;
+
+    for( int idx = tmp.find( xa ); idx >= 0; idx = tmp.find( xa ) )
+        tmp.replace( idx, xa.size(), xb );
+
+    return tmp;
+}
