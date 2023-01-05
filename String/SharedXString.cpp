@@ -2,6 +2,7 @@
 
 #include "String/SharedXString.h"
 
+#include <algorithm>
 #include <codecvt>
 #include <Windows.h>
 
@@ -9,12 +10,14 @@
 #include <qdatetime.h>
 #endif
 
+#pragma warning(disable:4996)
+
 std::string XString::toString() const
 {
     return Shared::String::ws2s( _str );
 }
 
-std::wstring XString::toWString()
+std::wstring XString::toWString() const
 {
     return _str;
 }
@@ -92,9 +95,9 @@ int XString::count( const XString& find ) const
 
     for( int idx = 0; idx < _str.size(); idx++ )
     {
-        if( _str.find( find ) == -1 )
+        if( _str.find( find.toWString() ) == -1 )
             break;
-        else if( _str.find( find, idx ) <= idx )
+        else if( _str.find( find.toWString(), idx ) <= idx )
             nCount += 1;
     }
 
@@ -113,12 +116,12 @@ XString XString::substr( int nSrc, int nDst ) const
 
 int XString::find_last_of( XString xs ) const
 {
-    return _str.find_last_of( xs );
+    return _str.find_last_of( xs.toWString() );
 }
 
 int XString::find( XString xs ) const
 {
-    return _str.find( xs );
+    return _str.find( xs.toWString() );
 }
 
 const wchar_t* XString::c_str() const
@@ -130,7 +133,7 @@ std::vector<XString> XString::split( const XString& sSplit ) const
 {
     std::wstring tmp = _str;
     std::vector<XString> vecList;
-    std::string::size_type st = tmp.find( sSplit );
+    std::string::size_type st = tmp.find( sSplit.toWString() );
     std::string::size_type nCurrent = 0;
 
     while( st != std::string::npos )
@@ -138,7 +141,7 @@ std::vector<XString> XString::split( const XString& sSplit ) const
         vecList.push_back( tmp.substr( nCurrent, st - nCurrent ) );
 
         nCurrent = st + 1;
-        st = tmp.find( sSplit, st + 1 );
+        st = tmp.find( sSplit.toWString(), st + 1 );
     }
 
     return vecList;
@@ -148,8 +151,8 @@ XString XString::replace( const XString& xa, const XString& xb )
 {
     std::wstring tmp = _str;
 
-    for( int idx = tmp.find( xa ); idx >= 0; idx = tmp.find( xa ) )
-        tmp.replace( idx, xa.size(), xb );
+    for( int idx = tmp.find( xa.toWString() ); idx >= 0; idx = tmp.find( xa.toWString() ) )
+        tmp.replace( idx, xa.size(), xb.toWString() );
 
     return tmp;
 }

@@ -1,10 +1,13 @@
 ﻿#ifndef __HDR_SHARED_XSTRING__
 #define __HDR_SHARED_XSTRING__
 
+#include <sstream>
 #include <string>
+#include <vector>
 
 #include "SharedBase.h"
 #include "String/SharedString.h"
+#include "Windows/SharedWinTools.h"
 
 #ifdef USING_QT_LIBS
 #include <qstring.h>
@@ -127,7 +130,7 @@ public:
 
     XString operator = ( const XString& wc )         // XString xs = L"TEST";
     {
-        _str = wc;
+        _str = wc.toWString();
         return _str;
     }
 
@@ -198,13 +201,28 @@ public:
         return xs.compare( _str ) == 0 ? true : false;
     }
 
+    bool operator ==( const XString& xs )
+    {
+        return _str.compare( xs.toWString() ) == 0 ? true : false;
+    }
+
+    bool operator ==( XString& xs )
+    {
+        return _str.compare( xs.toWString() ) == 0 ? true : false;
+    }
+
     bool operator ==( const std::wstring& xs )
     {
         return xs.compare( _str ) == 0 ? true : false;
     }
 
+    bool operator ==( const wchar_t* wc )
+    {
+        return _str.compare( wc ) == 0 ? true : false;
+    }
+
     std::string                      toString() const;
-    std::wstring                     toWString();
+    std::wstring                     toWString() const;
 #ifdef USING_QT_LIBS
     QString                          toQString() const;
 #endif  // USING_QT_LIBS

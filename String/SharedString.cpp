@@ -9,6 +9,8 @@
 #include <qdatetime.h>
 #endif
 
+#pragma warning(disable:4996)
+
 namespace Shared
 {
     namespace String

@@ -24,7 +24,7 @@ namespace Shared
             std::wstring ret;
             wchar_t result[ MAX_PATH ];
             std::wstring sCurrentPath = std::wstring( result, GetModuleFileName( NULL, result, MAX_PATH ) );
-            sCurrentPath = NormalizePath( sCurrentPath );
+            sCurrentPath = NormalizePath( sCurrentPath ).toWString();
 
             int find = sCurrentPath.rfind( L'/' );
             ret = sCurrentPath.substr( 0, find );

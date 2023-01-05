@@ -7,6 +7,7 @@
 #include "String/SharedXString.h"
 
 #include <string>
+#include <filesystem>
 
 #ifdef USING_QTLIB
 #include <qstring.h>

@@ -11,6 +11,7 @@
 #include <qstring.h>
 #endif // USING_QTLIB
 
+class XString;
 
 namespace Shared
 {
