@@ -248,5 +248,171 @@ namespace Shared
 
             return isSuccess;
         }
+
+        bool CreateWindowsService( const XString& sSvcName, const XString& sDisplay, const XString& sFileFullPath )
+        {
+            bool isSuccess = false;
+
+            SC_HANDLE hMgr = NULL;
+            SC_HANDLE hSvc = NULL;
+
+            do
+            {
+                hMgr = OpenSCManagerW( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+                if( hMgr == NULL )
+                    break;
+
+                hSvc = CreateServiceW( hMgr, sSvcName, sDisplay,
+                                       SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS, SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
+                                       sFileFullPath,
+                                       NULL, NULL, NULL, NULL, NULL );
+
+                if( hSvc == NULL )
+                    break;
+
+                isSuccess = true;
+
+            } while( false );
+
+            if( hSvc != NULL )
+                CloseServiceHandle( hSvc );
+
+            if( hMgr != NULL )
+                CloseServiceHandle( hMgr );
+
+            return isSuccess;
+        }
+
+        bool RunWindowsService( const XString& sSvcName )
+        {
+            bool isSuccess = false;
+
+            SC_HANDLE hMgr = NULL;
+            SC_HANDLE hSvc = NULL;
+
+            do
+            {
+                hMgr = OpenSCManagerW( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+                if( hMgr == NULL )
+                    break;
+
+                hSvc = OpenServiceW( hMgr, sSvcName, SERVICE_ALL_ACCESS );
+                if( hSvc == NULL )
+                    break;
+
+                isSuccess = StartServiceW( hSvc, 0, NULL ) == TRUE ? true : false;
+
+            } while( false );
+
+            if( hSvc != NULL )
+                CloseServiceHandle( hSvc );
+
+            if( hMgr != NULL )
+                CloseServiceHandle( hMgr );
+
+            return isSuccess;
+        }
+
+        bool RemoveWindowsService( const XString& sSvcName )
+        {
+            bool isSuccess = false;
+
+            SC_HANDLE hMgr = NULL;
+            SC_HANDLE hSvc = NULL;
+
+            do
+            {
+                hMgr = OpenSCManagerW( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+                if( hMgr == NULL )
+                    break;
+
+                hSvc = OpenServiceW( hMgr, sSvcName, SERVICE_ALL_ACCESS );
+                if( hSvc == NULL )
+                    break;
+
+                isSuccess = DeleteService( hSvc ) == TRUE ? true : false;
+
+            } while( false );
+
+            if( hSvc != NULL )
+                CloseServiceHandle( hSvc );
+
+            if( hMgr != NULL )
+                CloseServiceHandle( hMgr );
+
+            return isSuccess;
+        }
+
+        bool IsRunningService( const XString& sSvcName )
+        {
+            bool isSuccess = false;
+
+            SC_HANDLE hMgr = NULL;
+            SC_HANDLE hSvc = NULL;
+            SERVICE_STATUS status;
+
+            do
+            {
+                hMgr = OpenSCManagerW( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+                if( hMgr == NULL )
+                    break;
+
+                hSvc = OpenServiceW( hMgr, sSvcName, SERVICE_ALL_ACCESS );
+                if( hSvc == NULL )
+                    break;
+
+                QueryServiceStatus( hSvc, &status );
+
+                if( status.dwCurrentState == SERVICE_RUNNING )
+                    isSuccess = true;
+
+            } while( false );
+
+            if( hSvc != NULL )
+                CloseServiceHandle( hSvc );
+
+            if( hMgr != NULL )
+                CloseServiceHandle( hMgr );
+
+            return isSuccess;
+        }
+
+        bool IsExistService( const XString& sSvcName )
+        {
+            bool isSuccess = false;
+
+            SC_HANDLE hMgr = NULL;
+            SC_HANDLE hSvc = NULL;
+            SERVICE_STATUS status;
+
+            do
+            {
+                hMgr = OpenSCManagerW( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+                if( hMgr == NULL )
+                    break;
+
+                hSvc = OpenServiceW( hMgr, sSvcName, SERVICE_ALL_ACCESS );
+                if( hSvc == NULL )
+                    break;
+
+                hSvc = OpenServiceW( hMgr, sSvcName, SERVICE_QUERY_CONFIG | SERVICE_QUERY_STATUS );
+                if( hSvc == NULL )
+                {
+                    if( ::GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST )
+                    break;
+                }
+
+                isSuccess = true;
+
+            } while( false );
+
+            if( hSvc != NULL )
+                CloseServiceHandle( hSvc );
+
+            if( hMgr != NULL )
+                CloseServiceHandle( hMgr );
+
+            return isSuccess;
+        }
     }
 }
