@@ -150,6 +150,8 @@ public:
     operator std::string() const { return Shared::String::ws2s( _str ); }
     operator std::wstring() const { return _str; }
 
+    operator LPCWSTR() const { return _str.c_str(); }
+
 #ifdef USING_QT_LIBS
     operator QString() const { return QString::fromStdWString( _str ); }
 #endif  // USING_QT_LIBS
