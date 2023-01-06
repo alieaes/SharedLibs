@@ -81,6 +81,11 @@ bool XString::IsEmpty() const
     return _str.empty();
 }
 
+bool XString::Endl() const
+{
+    return _nPos > size() ? true : false;
+}
+
 int XString::size() const
 {
     return _str.size();
@@ -109,9 +114,9 @@ XString XString::substr( int nDst ) const
     return _str.substr( nDst );
 }
 
-XString XString::substr( int nSrc, int nDst ) const
+XString XString::substr( int nSrc, int nSize ) const
 {
-    return _str.substr( nSrc, nDst );
+    return _str.substr( nSrc, nSize );
 }
 
 int XString::find_last_of( XString xs ) const
@@ -147,12 +152,20 @@ std::vector<XString> XString::split( const XString& sSplit ) const
     return vecList;
 }
 
-XString XString::replace( const XString& xa, const XString& xb )
+XString XString::replaceAll( const XString& xa, const XString& xb )
 {
     std::wstring tmp = _str;
 
     for( int idx = tmp.find( xa.toWString() ); idx >= 0; idx = tmp.find( xa.toWString() ) )
         tmp.replace( idx, xa.size(), xb.toWString() );
+
+    return tmp;
+}
+
+XString XString::replace( const XString& xa, const XString& xb )
+{
+    std::wstring tmp = _str;
+    tmp.replace( tmp.find( xa.toWString() ), xa.size(), xb.toWString() );
 
     return tmp;
 }

@@ -234,6 +234,28 @@ public:
         return _str.compare( wc ) == 0 ? true : false;
     }
 
+    XString operator *()
+    {
+        if( _nPos > size() )
+            return NULL;
+        return _str[ _nPos ];
+    }
+
+    XString operator ++()
+    {
+        return _str[ _nPos++ ];
+    }
+
+    XString operator ++( int )
+    {
+        if( _nPos + 1 > size() )
+        {
+            ++_nPos;
+            return NULL;
+        }
+        return _str[ ++_nPos ];
+    }
+
     std::string                      toString() const;
     std::wstring                     toWString() const;
 #ifdef USING_QT_LIBS
@@ -250,12 +272,13 @@ public:
     std::vector< char >              toCharByte() const;
 
     bool                             IsEmpty() const;
+    bool                             Endl() const;
 
     int                              size() const;
     int                              count( const XString& find ) const;
 
     XString                          substr( int nDst ) const;
-    XString                          substr( int nSrc, int nDst ) const;
+    XString                          substr( int nSrc, int nSize ) const;
 
     int                              find_last_of( XString xs ) const;
     int                              find( XString xs ) const;
@@ -266,6 +289,7 @@ public:
 
     std::vector< XString >           split( const XString& sSplit ) const;
 
+    XString                          replaceAll( const XString& xa, const XString& xb );
     XString                          replace( const XString& xa, const XString& xb );
 
     int                              compare( const XString& xs, bool isCaseInsensitive = false ) const;
@@ -274,6 +298,7 @@ protected:
 
 private:
     std::wstring                     _str;
+    int                              _nPos = 0;
 };
 
 #endif
