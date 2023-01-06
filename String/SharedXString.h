@@ -175,6 +175,9 @@ public:
     XString operator +=( const char* c )
     {
         _str += Shared::String::s2ws( c );
+        if( _str.empty() == false )
+            _str.pop_back();
+
         return _str;
     }
 
@@ -187,6 +190,16 @@ public:
     XString operator +( std::wstring& xs )
     {
         _str += xs;
+        return _str;
+    }
+
+    XString operator +( const char* c )
+    {
+        _str += Shared::String::s2ws( c );
+
+        if( _str.empty() == false )
+            _str.pop_back();
+
         return _str;
     }
 
@@ -254,6 +267,8 @@ public:
     std::vector< XString >           split( const XString& sSplit ) const;
 
     XString                          replace( const XString& xa, const XString& xb );
+
+    int                              compare( const XString& xs, bool isCaseInsensitive = false ) const;
 
 protected:
 

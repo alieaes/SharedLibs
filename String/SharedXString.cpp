@@ -156,3 +156,18 @@ XString XString::replace( const XString& xa, const XString& xb )
 
     return tmp;
 }
+
+int XString::compare( const XString& xs, bool isCaseInsensitive /*= false*/ ) const
+{
+    if( isCaseInsensitive == true )
+    {
+        std::wstring xa = toLower();
+        std::wstring xb = xs.toLower();
+
+        return xa.compare( xb );
+    }
+    else
+    {
+        return _str.compare( xs.toWString() );
+    }
+}
