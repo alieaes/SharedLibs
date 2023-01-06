@@ -414,5 +414,47 @@ namespace Shared
 
             return isSuccess;
         }
+
+        bool SetPrivilege( LPCTSTR lpszPrivilege, BOOL isEnable )
+        {
+            TOKEN_PRIVILEGES tokenP;
+            LUID luid;
+            HANDLE hToken = NULL;
+            bool isSuccess = false;
+
+            do
+            {
+                if( OpenProcessToken( GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken ) == FALSE )
+                    break;
+
+                // lookup privilege on local system
+                // privilege to lookup 
+                // receives LUID of privilege
+                if( LookupPrivilegeValueW( NULL, lpszPrivilege, &luid ) == FALSE )
+                    break;
+
+                tokenP.PrivilegeCount = 1;
+                tokenP.Privileges[ 0 ].Luid = luid;
+
+                if( isEnable == TRUE )
+                    tokenP.Privileges[ 0 ].Attributes = SE_PRIVILEGE_ENABLED;
+                else
+                    tokenP.Privileges[ 0 ].Attributes = 0;
+
+                if( AdjustTokenPrivileges( hToken, FALSE, &tokenP, sizeof( TOKEN_PRIVILEGES ), ( PTOKEN_PRIVILEGES )NULL, ( PDWORD )NULL ) == FALSE )
+                    break;
+
+                if( GetLastError() == ERROR_NOT_ALL_ASSIGNED )
+                    break;
+
+                isSuccess = true;
+
+            } while( false );
+
+            if( hToken != NULL )
+                CloseHandle( hToken );
+
+            return isSuccess;
+        }
     }
 }

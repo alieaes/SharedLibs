@@ -29,6 +29,8 @@ namespace Shared
         bool                           RemoveWindowsService( const XString& sSvcName );
         bool                           IsRunningService( const XString& sSvcName );
         bool                           IsExistService( const XString& sSvcName );
+
+        bool                           SetPrivilege( LPCTSTR lpszPrivilege, BOOL isEnable );
     }
 }
 
