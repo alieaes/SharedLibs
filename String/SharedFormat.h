@@ -64,6 +64,11 @@ namespace Shared
                 _eType = DATA_TYPE_BOOL;
                 _b = b;
             }
+            FormatArg( XString xs )
+            {
+                _eType = DATA_TYPE_STRING;
+                _xs = xs;
+            }
 
             bool IsInit() { return _init == INT_MAX ? true : false; }
 
@@ -71,12 +76,7 @@ namespace Shared
             {
                 switch( _eType )
                 {
-                case DATA_TYPE_NONE:
-                    {
-                        
-                    } break;
-
-                
+                case DATA_TYPE_NONE: { return "FMT ERROR"; } break;
                 case DATA_TYPE_INT: { return ( int )_n; } break;
                 case DATA_TYPE_UINT: { return ( int )_d; } break;
                 case DATA_TYPE_LONG: { return ( int )_d; } break;
@@ -84,7 +84,7 @@ namespace Shared
                 case DATA_TYPE_DOUBLE: { return ( int )_d; } break;
                 case DATA_TYPE_STRING: { return _xs; } break;
                 case DATA_TYPE_BOOL: { return ( int )_b; } break;
-                default: ;
+                default: { return "FMT ERROR"; } break;
                 }
             }
         private:
@@ -97,6 +97,19 @@ namespace Shared
             XString _xs;
             bool _b = false;
         };
+
+        inline XString TypeCvt( XString sType, int nNum, bool bNumbers )
+        {
+            XString sRet = "{";
+            if( bNumbers == true )
+                sRet += XString( nNum ) + sType;
+            else
+                sRet += sType;
+
+            sRet += "}";
+
+            return sRet;
+        }
 
         template< typename ... Args >
         XString Format( XString fmt, Args ... args )
@@ -128,21 +141,55 @@ namespace Shared
                     int nStart = sRet.find( "{" );
                     int nEnd = sRet.find( "}" );
 
+                    int nType = nEnd - nStart;
                     XString sSub = sRet.substr( nStart, nEnd - nStart + 1 );
 
-                    if( sSub.compare( "{}" ) == 0 )
+                    if( nType == 1 )
                     {
                         if( nArrIdx >= nSize )
                             assert( false );
 
                         sRet = sRet.replace( "{}", arr[ nArrIdx++ ].Value() );
                     }
-                    else if( sSub.compare( "{:b}" ) == 0 )
+                    else if( nType > 1 )
                     {
-                        if( nArrIdx >= nSize )
-                            assert( false );
+                        int nTypeStart = nStart + 1;
+                        int nTypeEnd = nEnd;
+                        XString sType = sRet.substr( nTypeStart, nTypeEnd - nTypeStart );
 
-                        sRet = sRet.replace( "{:b}", arr[ nArrIdx++ ].Value() == 1 ? "true" : "false" );
+                        if( sType.contains( ":" ) == true )
+                        {
+                            int nNum = nArrIdx;
+                            bool bNumbers = false;
+
+                            if( sType.startswith( ":" ) == true )
+                            {
+                                nArrIdx++;
+                            }
+                            else
+                            {
+                                int nSep = sType.find( ":" );
+                                XString sNum = sType.substr( 0, nSep );
+                                nNum = sNum.toInt();
+                                bNumbers = true;
+                            }
+
+                            if( sType.contains( ":b" ) == true )
+                            {
+                                if( nArrIdx >= nSize )
+                                    assert( false );
+
+                                sRet = sRet.replace( TypeCvt( ":b", nNum, bNumbers ), arr[ nNum ].Value() == 1 ? "true" : "false" );
+                            }
+                        }
+                        else
+                        {
+                            int nNum = sType.toInt();
+                            if( nNum > nSize )
+                                assert( false );
+
+                            sRet = sRet.replace( "{" + sType + "}", arr[ nNum ].Value() );
+                        }
                     }
                 }
             }
