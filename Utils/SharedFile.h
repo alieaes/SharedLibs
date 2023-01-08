@@ -59,6 +59,8 @@ namespace Shared
 
         std::vector< XString >       GetFileListFromFolder( const XString& sFileFullPath );
 
+        bool                         RemoveFile( const XString& sFilePath );
+
         class SFileInfo
         {
         public:

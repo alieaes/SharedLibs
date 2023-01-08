@@ -152,5 +152,37 @@ namespace Shared
 
             return vecFileList;
         }
+
+        bool RemoveFile( const XString& sFilePath )
+        {
+            bool isSuccess = false;
+
+            do
+            {
+                if( IsExistFile( sFilePath ) == false )
+                    break;
+
+                BOOL bSuccess = DeleteFileW( sFilePath );
+
+                if( bSuccess == FALSE )
+                {
+                    DWORD dwAttr = GetFileAttributesW( sFilePath );
+                    if( dwAttr & FILE_ATTRIBUTE_READONLY )
+                    {
+                        dwAttr &= ~FILE_ATTRIBUTE_READONLY;
+                        bSuccess = SetFileAttributesW( sFilePath, dwAttr );
+
+                        if( bSuccess == TRUE )
+                            bSuccess = DeleteFileW( sFilePath );
+                    }
+                }
+
+                isSuccess = bSuccess == TRUE ? true : false;
+            }
+            while( false );
+
+            return isSuccess;
+            
+        }
     }
 }
