@@ -1,0 +1,20 @@
+﻿{
+	"Rev": "1",
+
+	"ID": 
+	{
+		"Migration": 
+		{
+			"Rev": 2,
+			"Count": 1,
+			"1": "QUERY"
+		},
+
+		"Create": 
+		{
+			"Rev": 1,
+			"1": "CREATE TABLE TBL_OPTION( policyName TEXT NOT NULL PRIMARY KEY, policyValue TEXT NOT NULL );"
+		}
+
+	}
+}
