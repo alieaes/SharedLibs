@@ -52,6 +52,19 @@ namespace Shared
             };
         };
 
+        class cDBTransaction
+        {
+        public:
+            cDBTransaction( sqlite3* db );
+            ~cDBTransaction();
+
+            bool                                   Begin();
+            bool                                   Commit();
+            bool                                   RollBack();
+        private:
+            sqlite3*                               _db;
+        };
+
         class cSQLiteDB
         {
         public:
@@ -75,6 +88,7 @@ namespace Shared
 
             XString                                 sDBName;
             XString                                 sFilePath;
+            XString                                 sJsonPath;
 
             spSQLiteDB                              spSQLite;
 

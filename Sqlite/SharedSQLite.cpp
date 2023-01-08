@@ -1,12 +1,17 @@
 ﻿#include "stdafx.h"
 
-#include "Utils/SharedFile.h"
+#include "Json/nlohmann/json.hpp"
 
+#include "Utils/SharedFile.h"
 #include "Sqlite/SharedSQLite.h"
+
+#include <fstream>
 
 #include "Sqlite/sqlite3.h"
 
 #include <Windows.h>
+
+#include "String/SharedFormat.h"
 
 #ifdef USING_QT_LIBS
 #include <qdatetime.h>
@@ -91,6 +96,83 @@ namespace Shared
             return sRet;
         }
 
+        cDBTransaction::cDBTransaction( sqlite3* db )
+        {
+            _db = db;
+            Begin();
+        }
+
+        cDBTransaction::~cDBTransaction()
+        {
+            Commit();
+        }
+
+        bool cDBTransaction::Begin()
+        {
+            bool isSuccess = false;
+            int rc = 0;
+
+            do
+            {
+                if( _db == NULLPTR )
+                    break;
+
+                char* cErr = 0;
+                rc = sqlite3_exec( _db, "BEGIN TRANSACTION", NULL, NULL, &cErr );
+
+                XString sErr = sqlite3_errmsg( _db );
+                if( rc == SQLITE_ROW || rc == SQLITE_OK || rc == SQLITE_DONE )
+                    isSuccess = true;
+
+            } while( false );
+
+            return isSuccess;
+        }
+
+        bool cDBTransaction::Commit()
+        {
+            bool isSuccess = false;
+            int rc = 0;
+
+            do
+            {
+                if( _db == NULLPTR )
+                    break;
+
+                char* cErr = 0;
+                rc = sqlite3_exec( _db, "COMMIT", NULL, NULL, &cErr );
+
+                XString sErr = sqlite3_errmsg( _db );
+                if( rc == SQLITE_ROW || rc == SQLITE_OK || rc == SQLITE_DONE )
+                    isSuccess = true;
+
+            } while( false );
+
+            return isSuccess;
+        }
+
+        bool cDBTransaction::RollBack()
+        {
+            bool isSuccess = false;
+            int rc = 0;
+
+            do
+            {
+                if( _db == NULLPTR )
+                    break;
+
+                char* cErr = 0;
+                rc = sqlite3_exec( _db, "ROLLBACK", NULL, NULL, &cErr );
+
+                XString sErr = sqlite3_errmsg( _db );
+                if( rc == SQLITE_ROW || rc == SQLITE_OK || rc == SQLITE_DONE )
+                    isSuccess = true;
+
+            } while( false );
+
+            return isSuccess;
+        }
+
         cSQLiteDB::cSQLiteDB( sqlite3* db )
         {
             _db = db;
@@ -118,6 +200,7 @@ namespace Shared
                     break;
 
                 rc = sqlite3_prepare16_v2( _db, sQuery.c_str(), -1, &s, NULL );
+                XString sErr = sqlite3_errmsg( _db );
 
                 if( rc != SQLITE_OK )
                     break;
@@ -167,7 +250,8 @@ namespace Shared
 
                 rc = sqlite3_step( s );
 
-                if( rc == SQLITE_ROW || rc == SQLITE_OK )
+                XString sErr = sqlite3_errmsg( _db );
+                if( rc == SQLITE_ROW || rc == SQLITE_OK || rc == SQLITE_DONE )
                     isSuccess = true;
 
                 rc = sqlite3_reset( s );
@@ -238,6 +322,48 @@ namespace Shared
                 sp->SetDB( db );
                 dbInfo.spSQLite = sp;
                 _mapNameToInfo[ dbInfo.sDBName ] = dbInfo;
+
+                nlohmann::basic_json<> JsonDB;
+
+                if( File::IsExistFile( dbInfo.sJsonPath ) == true )
+                {
+                    std::ifstream i;
+                    i.open( dbInfo.sJsonPath.toWString() );
+
+                    nlohmann::json json;
+
+                    i >> json;
+
+                    JsonDB = json[ dbInfo.sDBName ];
+                }
+
+                if( JsonDB.is_null() == true )
+                    break;
+
+                if( isExist == false )
+                {
+                    cDBTransaction t( sp->Data() );
+                    cStmt stmt;
+                    XString sQuery = "CREATE TABLE TBL_DEFAULT( id TEXT NOT NULL, rev TEXT NOT NULL );";
+
+                    sp->PrepareSQL( stmt, sQuery );
+                    sp->ExecuteSQL( stmt );
+
+                    auto JsonCreate = JsonDB[ "Create" ];
+                    int nRev = JsonCreate[ "Rev" ].get<int>();
+
+                    for( int idx = 1; idx <= nRev; idx++ )
+                    {
+                        XString sQueryTmp = String::u82ws( JsonCreate[ std::to_string( idx ) ].get<std::string>() );
+                        sp->PrepareSQL( stmt, sQueryTmp );
+                        sp->ExecuteSQL( stmt );
+                    }
+
+                    sQuery = Format::Format( "INSERT OR REPLACE INTO TBL_DEFAULT(id, rev) VALUES( \"{}\", \"{}\" ) ", dbInfo.sDBName, nRev );
+
+                    sp->PrepareSQL( stmt, sQuery );
+                    sp->ExecuteSQL( stmt );
+                }
 
                 isSuccess = true;
 
