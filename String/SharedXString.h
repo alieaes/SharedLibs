@@ -160,7 +160,13 @@ public:
 #endif  // USING_QT_LIBS
     ////////////////////////////////////////////
 
-    XString operator+= ( XString& xs )
+    XString operator+= ( int n )
+    {
+        _str += std::to_wstring( n );
+        return _str;
+    }
+
+    XString operator+= ( XString xs )
     {
         _str += xs.string();
         return _str;
@@ -293,6 +299,13 @@ public:
     XString                          replace( const XString& xa, const XString& xb );
 
     int                              compare( const XString& xs, bool isCaseInsensitive = false ) const;
+
+    bool                             contains( const XString& xs, bool isCaseInsensitive = false ) const;
+
+    bool                             startswith( const XString& xs, bool isCaseInsensitive = false ) const;
+    bool                             endswith( const XString& xs, bool isCaseInsensitive = false ) const;
+
+
 
 protected:
 

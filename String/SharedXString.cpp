@@ -184,3 +184,33 @@ int XString::compare( const XString& xs, bool isCaseInsensitive /*= false*/ ) co
         return _str.compare( xs.toWString() );
     }
 }
+
+bool XString::contains( const XString& xs, bool isCaseInsensitive /*= false*/ ) const
+{
+    if( isCaseInsensitive == true )
+    {
+        std::wstring tmp = toLower();
+        return tmp.contains( xs.toLower() );
+    }
+    return _str.contains( xs );
+}
+
+bool XString::startswith( const XString& xs, bool isCaseInsensitive /*= false*/ ) const
+{
+    if( isCaseInsensitive == true )
+    {
+        std::wstring tmp = toLower();
+        return tmp.starts_with( xs.toLower() );
+    }
+    return _str.starts_with( xs );
+}
+
+bool XString::endswith( const XString& xs, bool isCaseInsensitive /*= false*/ ) const
+{
+    if( isCaseInsensitive == true )
+    {
+        std::wstring tmp = toLower();
+        return tmp.ends_with( xs.toLower() );
+    }
+    return _str.ends_with( xs );
+}
