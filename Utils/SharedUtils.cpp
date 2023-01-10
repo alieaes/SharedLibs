@@ -63,12 +63,12 @@ namespace Shared
                     }
                     else if( vecCurrent[ idx ] > vecNext[ idx ] )
                     {
-                        eVersion = VERISON_LOWER;
+                        eVersion = VERSION_HIGHER;
                         break;
                     }
                     else if( vecCurrent[ idx ] < vecNext[ idx ] )
                     {
-                        eVersion = VERSION_HIGHER;
+                        eVersion = VERISON_LOWER;
                         break;
                     }
                     else
