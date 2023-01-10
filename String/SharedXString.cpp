@@ -31,9 +31,7 @@ QString XString::toQString() const
 
 bool XString::toBool() const
 {
-    auto tmp = toLower();
-
-    if( tmp == L"y" || tmp == L"true" || tmp == L"1" || tmp == L"yes" )
+    if( auto tmp = toLower(); tmp == L"y" || tmp == L"true" || tmp == L"1" || tmp == L"yes" )
         return true;
 
     return false;
@@ -52,7 +50,7 @@ long XString::toLong() const
 XString XString::toLower() const
 {
     std::wstring tmp = _str;
-    std::transform( tmp.begin(), tmp.end(), tmp.begin(), towlower );
+    std::ranges::transform( tmp, tmp.begin(), towlower );
 
     return tmp;
 }
@@ -60,7 +58,7 @@ XString XString::toLower() const
 XString XString::toUpper() const
 {
     std::wstring tmp = _str;
-    std::transform( tmp.begin(), tmp.end(), tmp.begin(), towupper );
+    std::ranges::transform( tmp, tmp.begin(), towupper );
 
     return tmp;
 }
@@ -152,7 +150,7 @@ std::vector<XString> XString::split( const XString& sSplit ) const
     return vecList;
 }
 
-XString XString::replaceAll( const XString& xa, const XString& xb )
+XString XString::replaceAll( const XString& xa, const XString& xb ) const
 {
     std::wstring tmp = _str;
 
@@ -162,7 +160,7 @@ XString XString::replaceAll( const XString& xa, const XString& xb )
     return tmp;
 }
 
-XString XString::replace( const XString& xa, const XString& xb )
+XString XString::replace( const XString& xa, const XString& xb ) const
 {
     std::wstring tmp = _str;
     tmp.replace( tmp.find( xa.toWString() ), xa.size(), xb.toWString() );
@@ -174,8 +172,8 @@ int XString::compare( const XString& xs, bool isCaseInsensitive /*= false*/ ) co
 {
     if( isCaseInsensitive == true )
     {
-        std::wstring xa = toLower();
-        std::wstring xb = xs.toLower();
+        const std::wstring xa = toLower();
+        const std::wstring xb = xs.toLower();
 
         return xa.compare( xb );
     }
@@ -189,7 +187,7 @@ bool XString::contains( const XString& xs, bool isCaseInsensitive /*= false*/ ) 
 {
     if( isCaseInsensitive == true )
     {
-        std::wstring tmp = toLower();
+        const std::wstring tmp = toLower();
         return tmp.contains( xs.toLower() );
     }
     return _str.contains( xs );
@@ -199,7 +197,7 @@ bool XString::startswith( const XString& xs, bool isCaseInsensitive /*= false*/ 
 {
     if( isCaseInsensitive == true )
     {
-        std::wstring tmp = toLower();
+        const std::wstring tmp = toLower();
         return tmp.starts_with( xs.toLower() );
     }
     return _str.starts_with( xs );
@@ -209,7 +207,7 @@ bool XString::endswith( const XString& xs, bool isCaseInsensitive /*= false*/ ) 
 {
     if( isCaseInsensitive == true )
     {
-        std::wstring tmp = toLower();
+        const std::wstring tmp = toLower();
         return tmp.ends_with( xs.toLower() );
     }
     return _str.ends_with( xs );

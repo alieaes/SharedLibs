@@ -84,8 +84,7 @@ public:
 #endif // USING_QT_LIBS
 
     ~XString()
-    {
-    }
+    = default;
 
     auto operator<=>( XString const& ) const = default;
 
@@ -215,32 +214,32 @@ public:
         return _str;
     }
 
-    bool operator ==( std::wstring& xs )
+    bool operator ==( std::wstring& xs ) const
     {
         return xs.compare( _str ) == 0 ? true : false;
     }
 
-    bool operator ==( const XString& xs )
+    bool operator ==( const XString& xs ) const
     {
         return _str.compare( xs.toWString() ) == 0 ? true : false;
     }
 
-    bool operator ==( XString& xs )
+    bool operator ==( XString& xs ) const
     {
         return _str.compare( xs.toWString() ) == 0 ? true : false;
     }
 
-    bool operator ==( const std::wstring& xs )
+    bool operator ==( const std::wstring& xs ) const
     {
         return xs.compare( _str ) == 0 ? true : false;
     }
 
-    bool operator ==( const wchar_t* wc )
+    bool operator ==( const wchar_t* wc ) const
     {
         return _str.compare( wc ) == 0 ? true : false;
     }
 
-    XString operator *()
+    XString operator *() const
     {
         if( _nPos > size() )
             return NULL;
@@ -295,8 +294,8 @@ public:
 
     std::vector< XString >           split( const XString& sSplit ) const;
 
-    XString                          replaceAll( const XString& xa, const XString& xb );
-    XString                          replace( const XString& xa, const XString& xb );
+    XString                          replaceAll( const XString& xa, const XString& xb ) const;
+    XString                          replace( const XString& xa, const XString& xb ) const;
 
     int                              compare( const XString& xs, bool isCaseInsensitive = false ) const;
 
@@ -304,8 +303,6 @@ public:
 
     bool                             startswith( const XString& xs, bool isCaseInsensitive = false ) const;
     bool                             endswith( const XString& xs, bool isCaseInsensitive = false ) const;
-
-
 
 protected:
 
