@@ -225,7 +225,8 @@ namespace Shared
                     break;
 
                 auto idx = sqlite3_bind_parameter_index( stmt.Get(), sBind.toString().c_str() );
-                rc = sqlite3_bind_text16( stmt.Get(), idx, sValue.c_str(), sValue.size(), SQLITE_STATIC );
+                // https://zoningout.tistory.com/121
+                rc = sqlite3_bind_text16( stmt.Get(), idx, sValue.toWString().c_str(), -1, SQLITE_TRANSIENT );
 
                 if( rc != SQLITE_OK )
                     break;
@@ -344,7 +345,12 @@ namespace Shared
                 {
                     cDBTransaction t( sp->Data() );
                     cStmt stmt;
-                    XString sQuery = "CREATE TABLE TBL_DEFAULT( id TEXT NOT NULL, rev TEXT NOT NULL );";
+                    XString sQuery = "PRAGMA encoding = \"UTF-16le\";";
+
+                    sp->PrepareSQL( stmt, sQuery );
+                    sp->ExecuteSQL( stmt );
+
+                    sQuery = "CREATE TABLE TBL_DEFAULT( id TEXT NOT NULL, rev TEXT NOT NULL );";
 
                     sp->PrepareSQL( stmt, sQuery );
                     sp->ExecuteSQL( stmt );
