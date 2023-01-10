@@ -15,4 +15,12 @@ static_assert( false, "Modify the 'Shared_Config.hpp.sample' file and save it as
 #include <QString>
 #endif
 
+#ifdef USING_SHARED_LOGGER
+#include "Logger/SharedLogger.h"
+
+#define CONSOLEP( str, ...) \
+        TyStLogger::GetInstance()->LoggingCase( Shared::Logger::LOG_TYPE_CONSOLE, __FILE__, __LINE__, Shared::Format::Format( str, __VA_ARGS__ ) );
+
+#endif // USING_SHARED_LOGGER
+
 #endif
