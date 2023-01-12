@@ -1,5 +1,5 @@
-#ifndef __HDR_SHARED_QT_UTILS__
-#define __HDR_SHARED_QT_UTILS__
+#ifndef __HDR_SHARED_QTOAST__
+#define __HDR_SHARED_QTOAST__
 
 #include "SharedBase.h"
 
@@ -12,6 +12,8 @@
 
 
 #ifdef USING_QT_LIBS
+
+class cToastNotification;
 
 typedef enum _tyToastIcon
 {
@@ -30,22 +32,47 @@ typedef enum _tyToastUsingBtn
     BTN_DOUBLE
 } TOAST_BUTTON;
 
+class cToastNotificationMgr : public QObject
+{
+    Q_OBJECT
+
+public:
+    cToastNotificationMgr( QWidget* parent = NULLPTR );
+    ~cToastNotificationMgr();
+
+    QSize                                 GetPosition();
+    void                                  MoveStack();
+    Q_INVOKABLE void                      ShowToastMsg( TOAST_ICON icon, TOAST_BUTTON btn, XString sTitle, XString sMsg, int nTimeOutSec = 10 );
+    Q_INVOKABLE void                      ShowToastMsg( QString sTitle, QString sMsg );
+
+private:
+    QWidget*                              _wdgParent;
+    QVector<cToastNotification*>          _vecNotification;
+
+    QSize                                 _ToastSize;
+    QSize                                 _SpaceSize;
+};
+
 class cToastNotification : public QObject
 {
     Q_OBJECT
 
 public:
     cToastNotification();
-    cToastNotification( QWidget* parent, TOAST_ICON icon, int nTimeOutSec, TOAST_BUTTON btn, XString sMsg );
+    cToastNotification( QWidget* parent, TOAST_ICON icon, TOAST_BUTTON btn, XString sTitle, XString sMsg, int nTimeOutSec = 10 );
     //cToastNotification( QWidget* parent, XString sMsg );
     ~cToastNotification();
 
     void                                  Init();
     void                                  SetToastUI();
-    void                                  SetToastBoxSize( int width, int height );
-    void                                  SetSpaceSize( int width, int height );
+    void                                  SetToastBoxSize( QSize size );
+    void                                  SetSpaceSize( QSize size );
 
     void                                  ShowToast();
+    void                                  MoveToastUI( int x, int y );
+
+public slots:
+    void                                  Close();
 
 private:
     void                                  prepareToast();
@@ -64,6 +91,7 @@ private:
     TOAST_ICON                            _eIcon;
     TOAST_BUTTON                          _eBtn;
 
+    XString                               _sTitle;
     XString                               _sMsg;
 
     QPushButton*                          _btnLeft;
