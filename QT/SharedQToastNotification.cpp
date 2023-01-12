@@ -187,6 +187,7 @@ void cToastNotification::SetSpaceSize( int width, int height )
 
 void cToastNotification::prepareToast()
 {
+    // parent가 없는 경우에는 데스크탑에 띄우도록 함
     if( _wdgParent == NULLPTR )
     {
         auto primayScreen = QGuiApplication::primaryScreen()->availableGeometry();
