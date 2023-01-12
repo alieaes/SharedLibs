@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/ICO">
+        <file>icon/icoAccept64.png</file>
+        <file>icon/icoError64.png</file>
+        <file>icon/icoInfo64.png</file>
+        <file>icon/icoWarning64.png</file>
+        <file>icon/cil-x.png</file>
+    </qresource>
+</RCC>
