@@ -261,6 +261,16 @@ public:
         return _str[ ++_nPos ];
     }
 
+    XString operator --( int )
+    {
+        if( _nPos - 1 < size() )
+        {
+            --_nPos;
+            return NULL;
+        }
+        return _str[ --_nPos ];
+    }
+
     std::string                      toString() const;
     std::wstring                     toWString() const;
 #ifdef USING_QT_LIBS
@@ -277,6 +287,7 @@ public:
     std::vector< char >              toCharByte() const;
 
     bool                             IsEmpty() const;
+    bool                             IsDigit() const;
     bool                             Endl() const;
 
     int                              size() const;

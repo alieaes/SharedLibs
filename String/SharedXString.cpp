@@ -39,7 +39,18 @@ bool XString::toBool() const
 
 int XString::toInt() const
 {
-    return std::stoi( _str );
+    int n = 0;
+    try
+    {
+        n= std::stoi( _str );
+    }
+    catch( const std::invalid_argument& ia )
+    {
+        // will be thrown later but with a diff msg
+        // it is added just to maintain consistency
+    }
+
+    return n;
 }
 
 long XString::toLong() const
@@ -77,6 +88,33 @@ std::vector<char> XString::toCharByte() const
 bool XString::IsEmpty() const
 {
     return _str.empty();
+}
+
+bool XString::IsDigit() const
+{
+    bool isDigit = false;
+    int n = toInt();
+
+    do
+    {
+        if( n == 0 )
+        {
+            if( compare( "0" ) == 0 )
+            {
+                isDigit = true;
+                break;
+            }
+
+            isDigit = false;
+        }
+        else
+        {
+            isDigit = true;
+        }
+    }
+    while( false );
+
+    return isDigit;
 }
 
 bool XString::Endl() const
