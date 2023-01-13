@@ -144,6 +144,25 @@ namespace Shared
                     int nType = nEnd - nStart;
                     XString sSub = sRet.substr( nStart, nEnd - nStart + 1 );
 
+                    if( sSub.startswith( "{{" ) == true )
+                    {
+                        XString sTmp = sRet;
+                        sTmp = sRet.replace( "{{", "[[" );
+
+                        nStart = sTmp.find( "{" );
+
+                        if( nStart < 0 )
+                        {
+                            *sRet++;
+                            continue;
+                        }
+
+                        nEnd = sRet.find( "}" );
+
+                        nType = nEnd - nStart;
+                        sSub = sRet.substr( nStart, nEnd - nStart + 1 );
+                    }
+
                     if( nType == 1 )
                     {
                         if( nArrIdx >= nSize )
@@ -170,6 +189,13 @@ namespace Shared
                             {
                                 int nSep = sType.find( ":" );
                                 XString sNum = sType.substr( 0, nSep );
+
+                                if( sNum.IsDigit() == false )
+                                {
+                                    *sRet++;
+                                    continue;
+                                }
+
                                 nNum = sNum.toInt();
                                 bNumbers = true;
                             }
@@ -184,6 +210,12 @@ namespace Shared
                         }
                         else
                         {
+                            if( sType.IsDigit() == false )
+                            {
+                                *sRet++;
+                                continue;
+                            }
+
                             int nNum = sType.toInt();
                             if( nNum > nSize )
                                 assert( false );
@@ -194,6 +226,8 @@ namespace Shared
                 }
             }
 
+            sRet = sRet.replaceAll( "{{", "{" );
+            sRet = sRet.replaceAll( "}}", "}" );
             return sRet;
         }
     }
