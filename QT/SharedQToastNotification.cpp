@@ -21,26 +21,44 @@ cToastNotificationMgr::cToastNotificationMgr( QWidget* parent /*= NULLPTR*/ )
     _wdgParent = parent;
     _ToastSize = QSize( 350, 100 );
     _SpaceSize = QSize( 20, 20 );
+    _position = RIGHT_TOP;
 }
 
 cToastNotificationMgr::~cToastNotificationMgr()
 {
 }
 
-QSize cToastNotificationMgr::GetPosition()
+QSize cToastNotificationMgr::GetParentSize()
 {
     QSize size;
-    // parent가 없는 경우에는 데스크탑에 띄우도록 함
     if( _wdgParent == NULLPTR )
     {
         auto primayScreen = QGuiApplication::primaryScreen()->availableGeometry();
-        size = QSize( primayScreen.width() - _ToastSize.width() - _SpaceSize.width(), primayScreen.height() - _ToastSize.height() - _SpaceSize.height() );
+        size = QSize( primayScreen.width(), primayScreen.height() );
     }
     else
     {
         auto parentScreen = _wdgParent->geometry();
-        size = QSize( parentScreen.width() - _ToastSize.width() - _SpaceSize.width(), 
-                      parentScreen.height() - _ToastSize.height() - _SpaceSize.height() );
+        size = QSize( parentScreen.width(), parentScreen.height() );
+    }
+
+    return size;
+}
+
+QSize cToastNotificationMgr::GetPosition()
+{
+    QSize size;
+    QSize parentSize = GetParentSize();
+
+    if( _position == RIGHT_BOTTOM )
+    {
+        size = QSize( parentSize.width() - _ToastSize.width() - _SpaceSize.width(),
+                      parentSize.height() - _ToastSize.height() - _SpaceSize.height() );
+    }
+    else if( _position == RIGHT_TOP )
+    {
+        size = QSize( parentSize.width() - _ToastSize.width() - _SpaceSize.width(), 
+                      0 /*+ _SpaceSize.height()*/ );
     }
 
     return size;
@@ -53,37 +71,123 @@ void cToastNotificationMgr::MoveStack()
     if( _vecNotification.size() > 0 )
     {
         int nX = 1;
+        int nIdx = -1;
+
+        std::lock_guard<std::mutex> lck( _lck );
+
         for( auto toast : _vecNotification )
         {
-            toast->MoveToastUI( position.width(), position.height() - nHeight * nX++ );
+            nIdx++;
+            int nCalc = 0;
+
+            if( _position == RIGHT_BOTTOM )
+            {
+                nCalc = position.height() - nHeight * nX++;
+
+                if( nCalc <= 0 )
+                {
+                    delete toast;
+                    _vecNotification.remove( nIdx );
+                    continue;
+                }
+            }
+            else if( _position == RIGHT_TOP )
+            {
+                nCalc = position.height() + nHeight * nX++;
+
+                if( nCalc >= ( GetParentSize().height() - nHeight ) )
+                {
+                    delete toast;
+                    _vecNotification.remove( nIdx );
+                    continue;
+                }
+            }
+
+            toast->MoveToastUI( position.width(), nCalc );
         }
     }
 }
 
 void cToastNotificationMgr::ShowToastMsg( TOAST_ICON icon, TOAST_BUTTON btn, XString sTitle, XString sMsg, int nTimeOutSec /*= 10*/ )
 {
-    cToastNotification* cToast = new cToastNotification( _wdgParent, icon, btn, sTitle, sMsg, nTimeOutSec );
+    cToastNotification* cToast = new cToastNotification( this, _wdgParent, icon, btn, _position, sTitle, sMsg, nTimeOutSec );
     cToast->SetToastBoxSize( _ToastSize );
     cToast->SetSpaceSize( _SpaceSize );
     cToast->SetToastUI();
 
     MoveStack();
 
-    _vecNotification.push_front( cToast );
+    insertToast( cToast );
     cToast->ShowToast();
 }
 
 void cToastNotificationMgr::ShowToastMsg( QString sTitle, QString sMsg )
 {
-    cToastNotification* cToast = new cToastNotification( _wdgParent, ICON_INFO, BTN_NONE, sTitle, sMsg );
+    cToastNotification* cToast = new cToastNotification( this, _wdgParent, ICON_INFO, BTN_NONE, RIGHT_TOP, sTitle, sMsg );
     cToast->SetToastBoxSize( _ToastSize );
     cToast->SetSpaceSize( _SpaceSize );
     cToast->SetToastUI();
 
     MoveStack();
 
-    _vecNotification.push_front( cToast );
+    insertToast( cToast );
     cToast->ShowToast();
+}
+
+void cToastNotificationMgr::CloseToast( cToastNotification* toast )
+{
+    std::lock_guard<std::mutex> lck( _lck );
+
+    int nDeletedIdx = 0;
+    for( auto toastUI : _vecNotification )
+    {
+        if( toastUI == toast )
+        {
+            delete toast;
+            _vecNotification.remove( nDeletedIdx );
+            break;
+        }
+        nDeletedIdx++;
+    }
+
+    int nIdx = 0;
+
+    for( auto toastUI : _vecNotification )
+    {
+        if( nIdx++ >= nDeletedIdx )
+        {
+            QSize position = toastUI->GetPosition();
+
+            int nHeight = _ToastSize.height() + _SpaceSize.height();
+
+            if( _position == RIGHT_BOTTOM )
+                toastUI->MoveToastUI( position.width(), position.height() + nHeight );
+            else if( _position == RIGHT_TOP )
+                toastUI->MoveToastUI( position.width(), position.height() - nHeight );
+        }
+    }
+}
+
+void cToastNotificationMgr::SetPosition( TOAST_POSITION position )
+{
+    _position = position;
+    Clear();
+}
+
+void cToastNotificationMgr::Clear()
+{
+    std::lock_guard<std::mutex> lck( _lck );
+
+    for( auto toastUI : _vecNotification )
+        delete toastUI;
+
+    _vecNotification.clear();
+}
+
+void cToastNotificationMgr::insertToast(cToastNotification* toast)
+{
+    std::lock_guard<std::mutex> lck( _lck );
+    _vecNotification.push_front( toast );
 }
 
 cToastNotification::cToastNotification()
@@ -91,16 +195,19 @@ cToastNotification::cToastNotification()
     Init();
 }
 
-cToastNotification::cToastNotification( QWidget* parent, TOAST_ICON icon, TOAST_BUTTON btn, XString sTitle, XString sMsg, int nTimeOutSec /*= 10*/ )
+cToastNotification::cToastNotification( cToastNotificationMgr* pToastMgr, QWidget* parent, TOAST_ICON icon, TOAST_BUTTON btn, TOAST_POSITION position, XString sTitle, XString sMsg, int nTimeOutSec /*= 10*/ )
+    : QDialog( parent )
 {
     Init();
 
+    _pToastMgr = pToastMgr;
     _nTimeOutSec = nTimeOutSec;
     _wdgParent = parent;
     _eIcon = icon;
     _eBtn = btn;
     _sMsg = sMsg;
     _sTitle = sTitle;
+    _position = position;
 }
 
 cToastNotification::~cToastNotification()
@@ -116,11 +223,16 @@ void cToastNotification::Init()
     _eIcon = ICON_INFO;
     _eBtn = BTN_DOUBLE;
     _nTimeOutSec = 10;
+    _position = RIGHT_BOTTOM;
 }
 
 void cToastNotification::SetToastUI()
 {
     _wdgBase = new QWidget();
+
+    if( _wdgParent != NULLPTR )
+        _wdgBase->setParent( _wdgParent );
+
     _wdgBase->setAttribute( Qt::WA_TranslucentBackground, true );
 
     _wdgBase->setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
@@ -151,9 +263,10 @@ void cToastNotification::SetToastUI()
         default: break;
     }
 
-    // format 에러 처리 필요 XString sStyle = Shared::Format::Format( "QWidget { background-color:{}; border-radius: 3px; }", sBgColor );
+    // format 에러 처리 필요
+    XString sStyle = Shared::Format::Format( "QWidget {{ background-color:{}; border-radius: 7px; }", sBgColor );
 
-    XString sStyle = QString( "QWidget { background-color:%1; border-radius: 7px; }" ).arg( sBgColor );
+    //XString sStyle = QString( "QWidget { background-color:%1; border-radius: 7px; }" ).arg( sBgColor );
     _wdgToastMsg->setStyleSheet( sStyle );
 
     QLayout* left = new QHBoxLayout;
@@ -265,33 +378,64 @@ void cToastNotification::prepareToast()
     {
         auto primayScreen = QGuiApplication::primaryScreen()->availableGeometry();
 
-        _wdgBase->move( primayScreen.width() - _wdgBase->width(), primayScreen.height() - _wdgBase->height() );
+        if( _position == RIGHT_BOTTOM )
+            _wdgBase->move( primayScreen.width() - _wdgBase->width(), primayScreen.height() - _wdgBase->height() );
+        else if( _position == RIGHT_TOP )
+            _wdgBase->move( primayScreen.width() - _wdgBase->width(), 0 );
+
         _wdgBase->show();
     }
     else
     {
         auto parentScreen = _wdgParent->geometry();
 
-        _wdgBase->move( parentScreen.width() - _wdgBase->width(), parentScreen.height() - _wdgBase->height() );
+        if( _position == RIGHT_BOTTOM )
+            _wdgBase->move( parentScreen.width() - _wdgBase->width(), parentScreen.height() - _wdgBase->height() );
+        else if( _position == RIGHT_TOP )
+            _wdgBase->move( parentScreen.width() - _wdgBase->width(), 0 );
+
         _wdgBase->show();
     }
 
-    _wdgToastMsg->move( _wdgBase->width(), _wdgBase->height() - _wdgToastMsg->height() - _spaceSize.height() );
+    if( _position == RIGHT_BOTTOM )
+        _wdgToastMsg->move( _wdgBase->width(), _wdgBase->height() - _wdgToastMsg->height() - _spaceSize.height() );
+    else if( _position == RIGHT_TOP )
+        _wdgToastMsg->move( _wdgBase->width(), 0 + _spaceSize.height() );
+
     _wdgToastMsg->show();
+}
+
+QSize cToastNotification::GetPosition()
+{
+    return QSize( _wdgBase->geometry().x(), _wdgBase->geometry().y() );
 }
 
 void cToastNotification::ShowToast()
 {
     QPropertyAnimation* _animation = new QPropertyAnimation( _wdgToastMsg, "geometry", this );
 
-    _animation->setDuration( 500 );
+    _animation->setDuration( 400 );
 
-    _animation->setStartValue( QRect( _wdgBase->width(),
-                                      _wdgBase->height() - _wdgToastMsg->height() - _spaceSize.height(),
-                                      _wdgToastMsg->width(), _wdgToastMsg->height() ) );
+    if( _position == RIGHT_BOTTOM )
+    {
+        _animation->setStartValue( QRect( _wdgBase->width(),
+                                          _wdgBase->height() - _wdgToastMsg->height() - _spaceSize.height(),
+                                          _wdgToastMsg->width(), _wdgToastMsg->height() ) );
 
-    _animation->setEndValue( QRect( _wdgBase->width() - _nWidth - _spaceSize.width(),
-                                    _wdgBase->height() - _nHeight - _spaceSize.height(), _wdgToastMsg->width(), _wdgToastMsg->height() ) );
+        _animation->setEndValue( QRect( _wdgBase->width() - _nWidth - _spaceSize.width(),
+                                        _wdgBase->height() - _nHeight - _spaceSize.height(), 
+                                        _wdgToastMsg->width(), _wdgToastMsg->height() ) );
+    }
+    else if( _position == RIGHT_TOP )
+    {
+        _animation->setStartValue( QRect( _wdgBase->width(),
+                                          0 + _spaceSize.height(),
+                                          _wdgToastMsg->width(), _wdgToastMsg->height() ) );
+
+        _animation->setEndValue( QRect( _wdgBase->width() - _nWidth - _spaceSize.width(),
+                                        0 + _spaceSize.height(),
+                                        _wdgToastMsg->width(), _wdgToastMsg->height() ) );
+    }
 
     connect( _animation, SIGNAL( finished() ), _animation, SLOT( deleteLater() ) );
 
@@ -305,5 +449,8 @@ void cToastNotification::MoveToastUI( int x, int y )
 
 void cToastNotification::Close()
 {
-    delete this;
+    if( _pToastMgr != NULLPTR )
+    {
+        _pToastMgr->CloseToast( this );
+    }
 }
