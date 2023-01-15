@@ -121,9 +121,9 @@ void cToastNotificationMgr::ShowToastMsg( TOAST_ICON icon, TOAST_BUTTON btn, XSt
     cToast->ShowToast();
 }
 
-void cToastNotificationMgr::ShowToastMsg( QString sTitle, QString sMsg )
+void cToastNotificationMgr::ShowToastMsg( QString sTitle, QString sMsg, TOAST_ICON icon /*= ICON_INFO*/ )
 {
-    cToastNotification* cToast = new cToastNotification( this, _wdgParent, ICON_INFO, BTN_NONE, RIGHT_TOP, sTitle, sMsg );
+    cToastNotification* cToast = new cToastNotification( this, _wdgParent, icon, BTN_NONE, RIGHT_TOP, sTitle, sMsg );
     cToast->SetToastBoxSize( _ToastSize );
     cToast->SetSpaceSize( _SpaceSize );
     cToast->SetToastUI();
@@ -257,9 +257,9 @@ void cToastNotification::SetToastUI()
     {
         case ICON_NONE: { sBgColor = "#272727"; } break;
         case ICON_INFO: { sIcon = ":/ICO/icon/icoInfo64.png"; sBgColor = "#3cacc4"; }break;
-        case ICON_WARNING: { sIcon = ":/ICO/icon/icoWarning64.png"; sBgColor = "#3cacc4"; } break;
-        case ICON_ERROR: { sIcon = ":/ICO/icon/icoError64.png"; sBgColor = "#3cacc4"; } break;
-        case ICON_SUCCESS: { sIcon = ":/ICO/icon/icoAccept64.png"; sBgColor = "#3cacc4"; } break;
+        case ICON_WARNING: { sIcon = ":/ICO/icon/icoWarning64.png"; sBgColor = "#df944a"; } break;
+        case ICON_ERROR: { sIcon = ":/ICO/icon/icoError64.png"; sBgColor = "#c74244"; } break;
+        case ICON_SUCCESS: { sIcon = ":/ICO/icon/icoAccept64.png"; sBgColor = "#4aa155"; } break;
         default: break;
     }
 
