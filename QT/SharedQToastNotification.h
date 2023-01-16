@@ -1,4 +1,4 @@
-#ifndef __HDR_SHARED_QTOAST__
+﻿#ifndef __HDR_SHARED_QTOAST__
 #define __HDR_SHARED_QTOAST__
 
 #include "SharedBase.h"
@@ -24,6 +24,7 @@ typedef enum _tyToastIcon
     ICON_SUCCESS
 } TOAST_ICON;
 
+Q_DECLARE_METATYPE( TOAST_ICON );
 
 typedef enum _tyToastUsingBtn
 {
@@ -72,6 +73,7 @@ private:
     QSize                                 _SpaceSize;
 };
 
+const int nTimerInterval = 10;
 class cToastNotification : public QDialog
 {
     Q_OBJECT
@@ -93,6 +95,7 @@ public:
 
 public slots:
     void                                  Close();
+    void                                  SetTimerValue();
 
 private:
     void                                  prepareToast();
@@ -120,7 +123,16 @@ private:
     QPushButton*                          _btnClose;
 
     cToastNotificationMgr*                _pToastMgr;
+
+    QTimer*                               _timer;
+    int                                   _nCurrentTimeout = 0;
+    QProgressBar*                         _progressbar;
+
+    QPropertyAnimation*                   _progressbarAnimation;
 };
+
+// 윈도우에 표기하는 건 Singleton으로 사용하도록 하고 각 UI에서 사용할 때는 따로 인스턴스를 생성하도록 함
+typedef Shared::Singletons::Singleton<cToastNotificationMgr> TyStDesktopNotification;
 
 #endif
 

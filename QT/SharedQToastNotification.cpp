@@ -355,7 +355,33 @@ void cToastNotification::SetToastUI()
     frmRight->setLayout( lay );
 
     left->addWidget( frmRight );
-    _wdgToastMsg->setLayout( left );
+
+    QFrame* frmMainTop = new QFrame;
+    frmMainTop->setLayout( left );
+
+    QFrame* frmMainBottom = new QFrame;
+    _progressbar = new QProgressBar;
+    _progressbar->setTextVisible( false );
+    _progressbar->setValue( 100 );
+    _progressbar->setStyleSheet( "QProgressBar { background-color: #3cacc4; border-bottom-left-radius: 17px; } QProgressBar::chunk{ background-color: white; border-bottom-left-radius: 17px; }" );
+
+    QVBoxLayout* pgLay = new QVBoxLayout;
+    pgLay->setContentsMargins( 6, 0, 6, 0 );
+    pgLay->setSpacing( 0 );
+    pgLay->addWidget( _progressbar );
+    frmMainBottom->setLayout( pgLay );
+    frmMainBottom->setMaximumHeight( 3 );
+    frmMainBottom->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
+    frmMainBottom->setAttribute( Qt::WA_TranslucentBackground );
+
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    mainLayout->setContentsMargins( 0, 0, 0, 0 );
+    mainLayout->setSpacing( 0 );
+    mainLayout->addWidget( frmMainTop );
+    mainLayout->addWidget( frmMainBottom );
+
+    _wdgToastMsg->setLayout( mainLayout );
+
 
     prepareToast();
 }
@@ -439,6 +465,14 @@ void cToastNotification::ShowToast()
 
     connect( _animation, SIGNAL( finished() ), _animation, SLOT( deleteLater() ) );
 
+    _progressbarAnimation = new QPropertyAnimation( _progressbar, "value", this );
+    _progressbarAnimation->setDuration( _nTimeOutSec * 1000 );
+    _progressbarAnimation->setStartValue( 100 );
+    _progressbarAnimation->setEndValue( 0 );
+    _progressbarAnimation->start( QAbstractAnimation::DeleteWhenStopped );
+
+    connect( _progressbarAnimation, SIGNAL( finished() ), this, SLOT( Close() ) );
+
     _animation->start( QAbstractAnimation::DeleteWhenStopped );
 }
 
@@ -453,4 +487,19 @@ void cToastNotification::Close()
     {
         _pToastMgr->CloseToast( this );
     }
+}
+
+void cToastNotification::SetTimerValue()
+{
+    int nTimoutMs = _nTimeOutSec * 1000;
+    _nCurrentTimeout += nTimerInterval;
+
+    int percent = static_cast< float >( _nCurrentTimeout ) / nTimoutMs * 100.0f;
+
+    CONSOLEP( "PERCENT = {}", percent );
+
+    _progressbar->setValue( 100 - percent );
+
+    if( percent >= 100 || _nCurrentTimeout >= nTimoutMs )
+        Close();
 }
