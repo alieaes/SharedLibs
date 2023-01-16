@@ -93,6 +93,8 @@ public:
     void                                  ShowToast();
     void                                  MoveToastUI( int x, int y );
 
+    virtual bool                          eventFilter( QObject* watched, QEvent* event ) override;
+
 public slots:
     void                                  Close();
     void                                  SetTimerValue();

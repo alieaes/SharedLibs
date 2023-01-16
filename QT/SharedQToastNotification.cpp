@@ -208,6 +208,8 @@ cToastNotification::cToastNotification( cToastNotificationMgr* pToastMgr, QWidge
     _sMsg = sMsg;
     _sTitle = sTitle;
     _position = position;
+    setAttribute( Qt::WA_Hover, true );
+    setMouseTracking( true );
 }
 
 cToastNotification::~cToastNotification()
@@ -229,6 +231,8 @@ void cToastNotification::Init()
 void cToastNotification::SetToastUI()
 {
     _wdgBase = new QWidget();
+    _wdgBase->setMouseTracking( true );
+    _wdgBase->installEventFilter( this );
 
     if( _wdgParent != NULLPTR )
         _wdgBase->setParent( _wdgParent );
@@ -243,6 +247,7 @@ void cToastNotification::SetToastUI()
     _wdgBase->setWindowOpacity( 0.8 );
 
     _wdgToastMsg = new QWidget( _wdgBase );
+    _wdgToastMsg->installEventFilter( this );
 
     _wdgToastMsg->setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
     _wdgToastMsg->setBaseSize( QSize( _nWidth, _nHeight ) );
@@ -479,6 +484,28 @@ void cToastNotification::ShowToast()
 void cToastNotification::MoveToastUI( int x, int y )
 {
     _wdgBase->move( x, y );
+}
+
+bool cToastNotification::eventFilter( QObject* watched, QEvent* event )
+{
+    if( watched == _wdgBase || watched == _wdgToastMsg )
+    {
+        if( event->type() == QEvent::Enter )
+        {
+            _progressbarAnimation->stop();
+        }
+        else if( event->type() == QEvent::Leave )
+        {
+            _progressbarAnimation = new QPropertyAnimation( _progressbar, "value", this );
+            _progressbarAnimation->setDuration( _nTimeOutSec * 1000 );
+            _progressbarAnimation->setStartValue( 100 );
+            _progressbarAnimation->setEndValue( 0 );
+            _progressbarAnimation->start( QAbstractAnimation::DeleteWhenStopped );
+
+            connect( _progressbarAnimation, SIGNAL( finished() ), this, SLOT( Close() ) );
+        }
+    }
+    return QDialog::eventFilter( watched, event );
 }
 
 void cToastNotification::Close()
