@@ -3,8 +3,6 @@
 
 #include "SharedBase.h"
 
-#include "String/SharedXString.h"
-
 #include <string>
 
 #include "Singleton.h"
@@ -42,6 +40,8 @@ namespace Shared
 
             bool                  Init( LOGGER_INFO info );
             void                  LoggingCase( LOG_CASE eCase, XString sFileName, int nCodeLine, XString sStr );
+            template< typename ... Args >
+            void                  LoggingCase( LOG_CASE eCase, XString sFileName, int nCodeLine, XString sStr, Args ... args );
             void                  LoggingToConsole( XString sLog );
             void                  LoggingToFile( XString sLog );
         private:
@@ -49,6 +49,11 @@ namespace Shared
 
             LOGGER_INFO           _info;
         };
+
+        template <typename ... Args>
+        void cLogger::LoggingCase( LOG_CASE eCase, XString sFileName, int nCodeLine, XString sStr, Args... args )
+        {
+        }
     }
 }
 

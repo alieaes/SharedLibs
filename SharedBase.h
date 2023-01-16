@@ -7,6 +7,9 @@
 
 #include "Singleton.h"
 
+#include <string>
+#include <windows.h>
+
 #ifndef SHARED_SET_CONFIG
 static_assert( false, "Modify the 'Shared_Config.hpp.sample' file and save it as a 'Shared_Config.hpp'" );
 #endif // ! SHARED_SET_CONFIG
@@ -14,6 +17,9 @@ static_assert( false, "Modify the 'Shared_Config.hpp.sample' file and save it as
 #ifdef USING_QT_LIBS
 #include <QString>
 #endif
+
+#include "String/SharedString.h"
+#include "String/SharedXString.h"
 
 #ifdef USING_SHARED_LOGGER
 #include "Logger/SharedLogger.h"

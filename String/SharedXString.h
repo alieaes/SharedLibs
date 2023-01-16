@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "SharedBase.h"
-#include "String/SharedString.h"
 #include "Windows/SharedWinTools.h"
 
 #ifdef USING_QT_LIBS

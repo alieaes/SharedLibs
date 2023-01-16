@@ -1,5 +1,7 @@
 ﻿#include "stdafx.h"
 
+#include "SharedBase.h"
+
 #include "Json/nlohmann/json.hpp"
 
 #include "Utils/SharedFile.h"
