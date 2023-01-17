@@ -208,8 +208,6 @@ cToastNotification::cToastNotification( cToastNotificationMgr* pToastMgr, QWidge
     _sMsg = sMsg;
     _sTitle = sTitle;
     _position = position;
-    setAttribute( Qt::WA_Hover, true );
-    setMouseTracking( true );
 }
 
 cToastNotification::~cToastNotification()
