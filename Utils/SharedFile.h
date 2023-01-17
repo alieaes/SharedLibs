@@ -45,6 +45,7 @@ namespace Shared
     {
         XString                      GetCurrentPath( bool bIncludeSeparator = false );
         XString                      NormalizePath( const XString& sFilePath );
+        XString                      CurrentPathAppend( const XString& sFileName );
 
         bool                         IsExistFile( const XString& sFilePath );
         bool                         IsExistDir( const XString& sFilePath );
@@ -60,6 +61,7 @@ namespace Shared
         std::vector< XString >       GetFileListFromFolder( const XString& sFileFullPath );
 
         bool                         RemoveFile( const XString& sFilePath );
+        bool                         MakeDir( const XString& sFilePath );
 
         class SFileInfo
         {

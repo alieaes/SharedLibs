@@ -8,6 +8,7 @@
 #include <filesystem>
 
 #include "String/SharedString.h"
+#include "String/SharedFormat.h"
 
 #include <Windows.h>
 
@@ -40,6 +41,12 @@ namespace Shared
             std::wstring s = sFilePath;
             std::replace( s.begin(), s.end(), L'\\', L'/' );
             return s;
+        }
+
+        XString CurrentPathAppend( const XString& sFileName )
+        {
+            XString sRet = GetCurrentPath( true ) + NormalizePath( sFileName );
+            return sRet;
         }
 
         bool IsExistFile( const XString& sFilePath )
@@ -183,6 +190,26 @@ namespace Shared
 
             return isSuccess;
             
+        }
+
+        bool MakeDir( const XString& sFilePath )
+        {
+            bool isSuccess = false;
+            std::filesystem::path p( sFilePath );
+
+            do
+            {
+                if( std::filesystem::is_directory( p ) == true )
+                {
+                    isSuccess = true;
+                    break;
+                }
+
+                isSuccess = std::filesystem::create_directories( p );
+            }
+            while( false );
+
+            return isSuccess;
         }
     }
 }
