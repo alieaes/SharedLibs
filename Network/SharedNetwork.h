@@ -81,6 +81,7 @@ namespace Shared
             void                                    RegisterServerHandler( funcHandler func );
             void                                    ServerReceiveThread( DWORD dwID, ASocket::Socket connectionClient );
             std::pair< bool, MSGID >                ServerSend( ASocket::Socket connectionClient, XString sMsg );
+            std::pair< bool, MSGID >                ServerResponse( ASocket::Socket connectionClient, MSGID nMsgId, XString sMsg );
             void                                    ServerListenThread();
             bool                                    ServerAllClientSend( XString sMsg );
 

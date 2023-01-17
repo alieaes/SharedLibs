@@ -159,7 +159,7 @@ namespace Shared
                 prRet.first = _pTCPClient->Send( sSend );
 
                 if( prRet.first == true )
-                    _msgID++;
+                    prRet.second = _msgID++;
             }
             while( false );
 
@@ -250,15 +250,30 @@ namespace Shared
 
             do
             {
-                if( _pTCPClient->IsConnected() == false )
-                    break;
-
                 auto sSend = convertSendMsg( sMsg, _msgID );
 
-                prRet.first = _pTCPClient->Send( sSend );
+                prRet.first = _pTCPServer->Send( connectionClient, sSend );
 
                 if( prRet.first == true )
-                    _msgID++;
+                    prRet.second = _msgID++;
+
+            } while( false );
+
+            return prRet;
+        }
+
+        std::pair<bool, MSGID> CNetwork::ServerResponse( ASocket::Socket connectionClient, MSGID nMsgId, XString sMsg )
+        {
+            std::pair< bool, MSGID > prRet = std::make_pair( false, 0 );
+
+            do
+            {
+                auto sSend = convertSendMsg( sMsg, nMsgId );
+
+                prRet.first = _pTCPServer->Send( connectionClient, sSend );
+
+                if( prRet.first == true )
+                    prRet.second = nMsgId;
 
             } while( false );
 
