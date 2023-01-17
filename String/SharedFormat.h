@@ -115,7 +115,7 @@ namespace Shared
         XString Format( XString fmt, Args ... args )
         {
             XString sRet = fmt;
-            FormatArg arr[] = { args... };
+            FormatArg arr[] = { args..., NULL };
 
             int nArrIdx = 0;
             int nSize = 0;
