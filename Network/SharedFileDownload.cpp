@@ -52,6 +52,32 @@ namespace Shared
             return isSuccess;
         }
 
+        ULONG64 cFileDownloader::GetFileSize( const XString& sUrl )
+        {
+            TCHAR buffer[ 32 ];
+            DWORD dwRead = 32;
+            DWORD dwFileSize = 0;
+            HINTERNET hURL = NULLPTR;
+
+            do
+            {
+                HINTERNET hURL = InternetOpenUrl( _hInternet, sUrl, NULL, 0, 0, 0 );
+
+                bool isSuccess = HttpQueryInfo( hURL, HTTP_QUERY_CONTENT_LENGTH, buffer, &dwRead, NULL );
+
+                if( isSuccess == false )
+                    break;
+
+                dwFileSize = atoi( ( const char* )buffer );
+            }
+            while( false );
+
+            if( hURL != NULLPTR )
+                InternetCloseHandle( hURL );
+
+            return dwFileSize;
+        }
+
         bool cFileDownloader::DownloadFile( const XString& sUrl, const XString& sSaveFileFullPath )
         {
             bool isSuccess = false;
@@ -129,7 +155,11 @@ namespace Shared
 
                     if( dwReadBytes > 0 )
                     {
-                        WriteFile( hFile, buffer, dwReadBytes, &dwWrite, NULL );
+                        if( WriteFile( hFile, buffer, dwReadBytes, &dwWrite, NULL ) == FALSE )
+                        {
+                            bDone = false;
+                            break;
+                        }
                         memset( buffer, 0x00, dwReadBytes );
                     }
 
@@ -137,6 +167,9 @@ namespace Shared
 
                 if( hFile != NULLPTR )
                     CloseHandle( hFile );
+
+                if( bDone == false )
+                    File::RemoveFile( sSaveFileFullPath );
 
                 isSuccess = bDone;
 

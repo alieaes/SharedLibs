@@ -27,6 +27,7 @@ namespace Shared
             ~cFileDownloader();
 
             bool                  Init();
+            ULONG64               GetFileSize( const XString& sUrl );
             bool                  DownloadFile( const XString& sUrl, const XString& sSaveFileFullPath );
             bool                  DownloadFile( const XString& sUrl, const XString& sSaveFilePath, const XString& sSaveFileName );
         private:
