@@ -58,6 +58,11 @@ public:
         _str = std::to_wstring( n );
     }
 
+    XString( double d )
+    {
+        _str = std::to_wstring( d );
+    }
+
     XString( const std::wstring& ws )
     {
         _str = ws;
@@ -161,6 +166,12 @@ public:
     XString operator+= ( int n )
     {
         _str += std::to_wstring( n );
+        return _str;
+    }
+
+    XString operator+= ( double d )
+    {
+        _str += std::to_wstring( d );
         return _str;
     }
 
