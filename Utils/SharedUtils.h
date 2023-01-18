@@ -29,6 +29,7 @@ namespace Shared
         XString                 CreateUUID( bool bUpper = true );
 
         VERSION_CHECK           VersionCheck( XString sCurrentVersion, XString sNextVersion );
+        XString                 ConvertByte( ULONG64 uByte );
     }
 }
 

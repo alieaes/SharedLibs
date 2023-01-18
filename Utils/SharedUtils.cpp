@@ -10,6 +10,7 @@
 #include "String/SharedString.h"
 #include "String/SharedXString.h"
 #include "Utils/SharedUtils.h"
+#include "String/SharedFormat.h"
 
 #include <Windows.h>
 #include <Rpc.h>
@@ -81,6 +82,37 @@ namespace Shared
             while( false );
 
             return eVersion;
+        }
+
+        XString ConvertByte( ULONG64 uByte )
+        {
+            const char* cUnit[] = { "B", "KB", "MB", "GB", "TB", "PB" };
+            int idx = 0;
+            double dRet = 0;
+
+            if( uByte >= 1024 )
+            {
+                dRet = uByte;
+                for( idx = 0; dRet >= 1024; idx++ )
+                    dRet /= 1024.0f;
+            }
+
+            double dInt = 0;
+            auto fraction = modf( dRet, &dInt );
+            XString sRet;
+
+            if( fabs( fraction - 0 ) <= FLT_EPSILON )
+            {
+                sRet = Format::Format( "{}{}", ( int )dInt, cUnit[ idx ] );
+            }
+            else
+            {
+                XString sTmp = dRet;
+                sTmp = sTmp.substr( 0, sTmp.find( "." ) + 3 );
+                sRet = Format::Format( "{}{}", sTmp, cUnit[ idx ] );
+            }
+
+            return sRet;
         }
     }
 }
