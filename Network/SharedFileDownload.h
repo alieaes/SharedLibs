@@ -34,6 +34,9 @@ namespace Shared
             XString               _sName;
             bool                  _isInit = false;
             HINTERNET             _hInternet = NULLPTR;
+
+            bool                  _isProcesss = false;
+            ULONG64               _ulDownLoadSize = 0;
         };
     }
 }

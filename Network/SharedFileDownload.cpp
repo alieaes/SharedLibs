@@ -80,6 +80,7 @@ namespace Shared
 
         bool cFileDownloader::DownloadFile( const XString& sUrl, const XString& sSaveFileFullPath )
         {
+            _ulDownLoadSize = 0;
             bool isSuccess = false;
             HINTERNET hOpenUrl = NULLPTR;
             do
@@ -137,6 +138,8 @@ namespace Shared
 
                 do
                 {
+                    _isProcesss = true;
+
                     DWORD dwAvailable = 0;
                     if( InternetQueryDataAvailable( hOpenUrl, &dwAvailable, 0, 0 ) == FALSE )
                     {
@@ -160,10 +163,13 @@ namespace Shared
                             bDone = false;
                             break;
                         }
+                        _ulDownLoadSize += dwReadBytes;
                         memset( buffer, 0x00, dwReadBytes );
                     }
 
                 } while( dwReadBytes != 0 );
+
+                _isProcesss = false;
 
                 if( hFile != NULLPTR )
                     CloseHandle( hFile );
@@ -184,6 +190,14 @@ namespace Shared
         bool cFileDownloader::DownloadFile( const XString& sUrl, const XString& sSaveFilePath, const XString& sSaveFileName )
         {
             return DownloadFile( sUrl, Format::Format( "{}\\{}", sSaveFilePath, sSaveFileName ) );
+        }
+
+        ULONG64 cFileDownloader::GetDownLoadSize()
+        {
+            if( _isProcesss == true )
+                return _ulDownLoadSize;
+            else
+                return 0;
         }
     }
 }
