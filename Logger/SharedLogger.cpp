@@ -2,8 +2,6 @@
 
 #include "Logger/SharedLogger.h"
 #include "Utils/SharedFile.h"
-#include "String/SharedFormat.h"
-#include "String/SharedXString.h"
 
 #include <Windows.h>
 

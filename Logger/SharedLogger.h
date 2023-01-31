@@ -3,14 +3,6 @@
 
 #include "SharedBase.h"
 
-#include <string>
-
-#include "Singleton.h"
-
-#ifdef USING_QT_LIBS
-#include <qstring.h>
-#endif // USING_QTLIB
-
 class XString;
 
 namespace Shared

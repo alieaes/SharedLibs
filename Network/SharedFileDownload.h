@@ -30,6 +30,9 @@ namespace Shared
             ULONG64               GetFileSize( const XString& sUrl );
             bool                  DownloadFile( const XString& sUrl, const XString& sSaveFileFullPath );
             bool                  DownloadFile( const XString& sUrl, const XString& sSaveFilePath, const XString& sSaveFileName );
+
+            ULONG64               GetDownLoadSize();
+
         private:
             XString               _sName;
             bool                  _isInit = false;

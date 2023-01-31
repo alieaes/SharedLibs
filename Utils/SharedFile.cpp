@@ -7,11 +7,6 @@
 #include <fstream>
 #include <filesystem>
 
-#include "String/SharedString.h"
-#include "String/SharedFormat.h"
-
-#include <Windows.h>
-
 #ifdef USING_QTLIB
 #include <qdatetime.h>
 #endif

@@ -6,14 +6,9 @@
 
 #include "Utils/SharedFile.h"
 #include "Sqlite/SharedSQLite.h"
-
-#include <fstream>
-
 #include "Sqlite/sqlite3.h"
 
-#include <Windows.h>
-
-#include "String/SharedFormat.h"
+#include <fstream>
 
 #ifdef USING_QT_LIBS
 #include <qdatetime.h>

@@ -3,11 +3,6 @@
 
 #include <string>
 
-#ifdef USING_QTLIB
-#include <qstring.h>
-#endif // USING_QTLIB
-
-
 namespace Shared
 {
     namespace String

@@ -6,13 +6,6 @@
 
 #include <Windows.h>
 
-#include "String/SharedFormat.h"
-
-
-#ifdef USING_QTLIB
-#include <qdatetime.h>
-#endif
-
 const QString BTN_CSS = "QPushButton { border: 2px solid rgb(52, 59, 72); border-radius: 5px; background-color: rgb(52, 59, 72); color: white; } QPushButton:hover { background-color: rgb(57, 65, 80); border: 2px solid rgb(61, 70, 86); } QPushButton:pressed { background-color: rgb(35, 40, 49); border: 2px solid rgb(43, 50, 61); }";
 const QString CLOSE_BTN_CSS = "QPushButton { background-color: #3cacc4; border: none;  border-radius: 5px; } QPushButton:hover { background-color: #369bb1; border-style: solid; border-radius: 4px; } QPushButton:pressed { background-color: #308a9d; border-style: solid; border-radius: 4px; }";
 
@@ -179,7 +172,10 @@ void cToastNotificationMgr::Clear()
     std::lock_guard<std::mutex> lck( _lck );
 
     for( auto toastUI : _vecNotification )
+    {
+        toastUI->close();
         delete toastUI;
+    }
 
     _vecNotification.clear();
 }
@@ -213,6 +209,7 @@ cToastNotification::cToastNotification( cToastNotificationMgr* pToastMgr, QWidge
 cToastNotification::~cToastNotification()
 {
     _wdgToastMsg->hide();
+    _wdgBase->hide();
     disconnect( _btnClose, SIGNAL( clicked() ), this, SLOT( Close() ) );
 }
 
@@ -308,13 +305,14 @@ void cToastNotification::SetToastUI()
     QLabel* lblTitle = new QLabel;
     lblTitle->setText( QString( "<b>%1</b>" ).arg( _sTitle ) );
     center->addWidget( lblTitle );
+
     QLabel* lblContens = new QLabel;
     lblContens->setText( _sMsg );
     center->addWidget( lblContens );
 
     if( _eBtn != BTN_NONE )
     {
-        QFrame* frm2 = new QFrame;
+        QFrame* frm2 = new QFrame( frm );
         QLayout* btnLayout = new QHBoxLayout;
         btnLayout->setContentsMargins( 0, 0, 0, 0 );
         frm2->setContentsMargins( 0, 10, 0, 0 );
@@ -486,11 +484,12 @@ void cToastNotification::MoveToastUI( int x, int y )
 
 bool cToastNotification::eventFilter( QObject* watched, QEvent* event )
 {
-    if( watched == _wdgBase || watched == _wdgToastMsg )
+    if( watched == _wdgBase )
     {
         if( event->type() == QEvent::Enter )
         {
-            _progressbarAnimation->stop();
+            if( _progressbarAnimation->state() == QAbstractAnimation::Running )
+                _progressbarAnimation->stop();
         }
         else if( event->type() == QEvent::Leave )
         {

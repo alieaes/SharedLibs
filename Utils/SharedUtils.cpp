@@ -2,18 +2,13 @@
 
 #include "SharedBase.h"
 
+#include "Utils/SharedUtils.h"
 #include "Utils/SharedFile.h"
 
 #include <fstream>
 #include <filesystem>
-
-#include "String/SharedString.h"
-#include "String/SharedXString.h"
-#include "Utils/SharedUtils.h"
-#include "String/SharedFormat.h"
-
-#include <Windows.h>
 #include <Rpc.h>
+
 #pragma comment(lib, "Rpcrt4.lib")
 
 #ifdef USING_QTLIB

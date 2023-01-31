@@ -5,8 +5,6 @@
 #include "SharedBase.h"
 
 #include "Utils/SharedFile.h"
-#include "String/SharedXString.h"
-#include "String/SharedFormat.h"
 
 #include <Windows.h>
 #include <iostream>

@@ -1,14 +1,9 @@
 #ifndef __HDR_SHARED_FORMAT__
 #define __HDR_SHARED_FORMAT__
 
-#include <string>
+#include "SharedBase.h"
 
 #include "String/SharedXString.h"
-
-#ifdef USING_QTLIB
-#include <qstring.h>
-#endif // USING_QTLIB
-
 
 namespace Shared
 {
@@ -220,7 +215,8 @@ namespace Shared
                             if( nNum > nSize )
                                 assert( false );
 
-                            sRet = sRet.replace( "{" + sType + "}", arr[ nNum ].Value() );
+                            XString sTmp = "{";
+                            sRet = sRet.replace( sTmp + sType + "}", arr[ nNum ].Value() );
                         }
                     }
                 }

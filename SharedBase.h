@@ -2,26 +2,27 @@
 #define __SHARED_LIBS_BASE__
 
 #include "Shared_Config.hpp"
-
 #include "Shared_Defs.h"
 
 #include "Singleton.h"
 
-#include <string>
-#include <windows.h>
+#include "String/SharedString.h"
+
+#include "String/SharedXString.h"
 
 #ifndef SHARED_SET_CONFIG
 static_assert( false, "Modify the 'Shared_Config.hpp.sample' file and save it as a 'Shared_Config.hpp'" );
 #endif // ! SHARED_SET_CONFIG
 
+#include <string>
+#include <windows.h>
+
 #ifdef USING_QT_LIBS
 #include <QString>
 #endif
 
-#include "String/SharedString.h"
-#include "String/SharedXString.h"
-
 #ifdef USING_SHARED_LOGGER
+#include "String/SharedFormat.h"
 #include "Logger/SharedLogger.h"
 
 #define CONSOLEP( str, ...) \

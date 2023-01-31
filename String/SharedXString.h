@@ -2,16 +2,9 @@
 #define __HDR_SHARED_XSTRING__
 
 #include <sstream>
-#include <string>
 #include <vector>
 
-#include "SharedBase.h"
-#include "Windows/SharedWinTools.h"
-
-#ifdef USING_QT_LIBS
-#include <qstring.h>
-#endif // USING_QT_LIBS
-
+#include "SharedString.h"
 
 class XString
 {
