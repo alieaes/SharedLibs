@@ -135,6 +135,64 @@ namespace Shared
             return isSuccess;
         }
 
+        bool GetRegBinaryValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::vector<BYTE>& vecValueData, bool isRead32View )
+        {
+            HKEY key = NULL;
+            bool isSuccess = false;
+
+            do
+            {
+                vecValueData.clear();
+                DWORD dwFlags = KEY_READ;
+
+                if( isRead32View == true )
+                    dwFlags |= KEY_WOW64_32KEY;
+                else
+                    dwFlags |= KEY_WOW64_64KEY;
+
+                LONG lErr = RegOpenKeyExW( hkey, subKey.c_str(), 0, dwFlags, &key );
+                isSuccess = lErr == ERROR_SUCCESS;
+
+                if( isSuccess == false )
+                    break;
+
+                DWORD dwDataLength = 0;
+                DWORD dwDataType = 0;
+
+                lErr = RegQueryValueExW( key, sValueName.c_str(), 0, &dwDataType, NULL, &dwDataLength );
+                isSuccess = lErr == ERROR_SUCCESS;
+
+                if( isSuccess == false )
+                    break;
+
+                switch( dwDataType )
+                {
+                    case REG_BINARY:
+                    {
+                        vecValueData.resize( dwDataLength + 1 );
+
+                        lErr = RegQueryValueExW( key, sValueName.c_str(), 0, NULL, ( LPBYTE )&vecValueData[ 0 ], &dwDataLength );
+                        isSuccess = lErr == ERROR_SUCCESS;
+
+                        if( isSuccess == false )
+                            break;
+
+                        break;
+                    }
+                    default:
+                    {
+                        break;
+                    }
+                }
+
+            } while( false );
+
+            if( key != NULL )
+                RegCloseKey( key );
+
+            return isSuccess;
+        }
+
         std::wstring GetProcessSID( uint32_t dwProcessID, bool* ok /*= NULLPTR */ )
         {
             std::wstring sProcessSID;

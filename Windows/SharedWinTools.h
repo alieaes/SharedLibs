@@ -19,6 +19,7 @@ namespace Shared
     {
         bool                           SetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& valueName, const std::wstring& valueData, bool isWrite32Key );
         bool                           GetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::wstring& valueData, bool isRead32View );
+        bool                           GetRegBinaryValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::vector<BYTE>& vecValueData, bool isRead32View );
 
         std::wstring                   GetProcessSID( uint32_t dwProcessID, bool* ok = NULLPTR );
 
