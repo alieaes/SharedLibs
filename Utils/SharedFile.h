@@ -41,7 +41,7 @@ namespace Shared
         bool                         IsExistFile( const XString& sFilePath );
         bool                         IsExistDir( const XString& sFilePath );
 
-        XString                      GetFileExts( const XString& sFileFullPath );
+        XString                      GetFileExts( const XString& sFileFullPath, bool isIncludeDot = true );
         XString                      GetFileBaseName( const XString& sFileFullPath );
 
         XString                      FindFileName( const XString& sFileFullPath );

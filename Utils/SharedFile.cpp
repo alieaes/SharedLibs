@@ -74,13 +74,15 @@ namespace Shared
             return isExist;
         }
 
-        XString GetFileExts( const XString& sFileFullPath )
+        XString GetFileExts( const XString& sFileFullPath, bool isIncludeDot /*= true*/ )
         {
             if( sFileFullPath.IsEmpty() == true )
                 return XString();
 
+            int nIncludeDot = isIncludeDot == true ? 0 : 1;
+
             std::wstring sExts = sFileFullPath;
-            int find = sExts.rfind( L'.' );
+            int find = sExts.rfind( L'.' ) + nIncludeDot;
 
             // 확장자가 없는 경우 전체경로를 그대로 돌려줌
             if( find == -1 )
