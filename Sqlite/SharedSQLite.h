@@ -92,6 +92,7 @@ namespace Shared
 
             spSQLiteDB                              spSQLite;
 
+            bool                                    isUseWALMode = false;
         } DB_INFO;
 
         class cSQLiteMgr

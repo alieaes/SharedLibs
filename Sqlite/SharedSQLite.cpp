@@ -323,6 +323,15 @@ namespace Shared
 
                 nlohmann::basic_json<> JsonDB;
 
+                if( dbInfo.isUseWALMode == true )
+                {
+                    cStmt stmt;
+                    XString sQuery = "PRAGMA journal_mode=WAL;";
+
+                    sp->PrepareSQL( stmt, sQuery );
+                    sp->ExecuteSQL( stmt );
+                }
+
                 if( File::IsExistFile( dbInfo.sJsonPath ) == true )
                 {
                     std::ifstream i;
