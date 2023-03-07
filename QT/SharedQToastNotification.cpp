@@ -238,6 +238,7 @@ void cToastNotification::SetToastUI()
     _wdgBase->setBaseSize( QSize( _nWidth + _spaceSize.width(), _nHeight + _spaceSize.height() ) );
     _wdgBase->setMaximumSize( QSize( _nWidth + _spaceSize.width(), _nHeight + _spaceSize.height() ) );
     _wdgBase->setMinimumSize( QSize( _nWidth + _spaceSize.width(), _nHeight + _spaceSize.height() ) );
+    // Toast 창이 이벤트를 뺏어가는 걸 방지하려면 WindowTransparentForInput 플래그 추가
     _wdgBase->setWindowFlags( Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::SubWindow );
     _wdgBase->setWindowOpacity( 0.8 );
 
@@ -263,10 +264,8 @@ void cToastNotification::SetToastUI()
         default: break;
     }
 
-    // format 에러 처리 필요
     XString sStyle = Shared::Format::Format( "QWidget {{ background-color:{}; border-radius: 7px; }", sBgColor );
 
-    //XString sStyle = QString( "QWidget { background-color:%1; border-radius: 7px; }" ).arg( sBgColor );
     _wdgToastMsg->setStyleSheet( sStyle );
 
     QLayout* left = new QHBoxLayout;
