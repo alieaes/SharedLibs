@@ -152,7 +152,7 @@ namespace Shared
             std::vector< XString > vecFileList;
 
             for( const auto& entry : std::filesystem::directory_iterator( sFileFullPath.c_str() ) )
-                vecFileList.push_back( entry.path().wstring() );
+                vecFileList.push_back( NormalizePath( entry.path().wstring() ) );
 
             return vecFileList;
         }
