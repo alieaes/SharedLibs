@@ -134,12 +134,21 @@ int XString::count( const XString& find ) const
     if( find.IsEmpty() == true )
         return nCount;
 
-    for( int idx = 0; idx < _str.size(); idx++ )
+    size_t sizeFind = std::string::npos;
+    int idx = 0;
+
+    while( true )
     {
-        if( _str.find( find.toWString() ) == -1 )
+        sizeFind = _str.find( find.toWString(), idx );
+        if( sizeFind != std::string::npos )
+        {
+            nCount++;
+            idx = sizeFind + 1;
+        }
+        else
+        {
             break;
-        else if( _str.find( find.toWString(), idx ) <= idx )
-            nCount += 1;
+        }
     }
 
     return nCount;
@@ -172,17 +181,21 @@ const wchar_t* XString::c_str() const
 
 std::vector<XString> XString::split( const XString& sSplit ) const
 {
-    std::wstring tmp = _str;
+    int nCnt = count( sSplit );
+    int nSize = sSplit.size();
+
     std::vector<XString> vecList;
-    std::string::size_type st = tmp.find( sSplit.toWString() );
+    vecList.reserve( nCnt );
+
+    std::string::size_type st = _str.find( sSplit.toWString() );
     std::string::size_type nCurrent = 0;
 
     while( st != std::string::npos )
     {
-        vecList.push_back( tmp.substr( nCurrent, st - nCurrent ) );
+        vecList.push_back( _str.substr( nCurrent, st - nCurrent ) );
 
-        nCurrent = st + 1;
-        st = tmp.find( sSplit.toWString(), st + 1 );
+        nCurrent = st + nSize;
+        st = _str.find( sSplit.toWString(), st + nSize );
     }
 
     return vecList;
