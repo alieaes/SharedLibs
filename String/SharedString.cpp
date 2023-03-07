@@ -15,6 +15,19 @@ namespace Shared
 {
     namespace String
     {
+        std::wstring a2ws(const std::string& str)
+        {
+            if( str.empty() == true )
+                return std::wstring();
+
+            int size_needed = MultiByteToWideChar( CP_ACP, 0, &str[ 0 ], ( int )str.size() + 1, NULL, 0 );
+            std::wstring wstrTo( size_needed, 0 );
+
+            MultiByteToWideChar( CP_ACP, 0, &str[ 0 ], ( int )str.size(), &wstrTo[ 0 ], size_needed );
+
+            return wstrTo;
+        }
+
         std::wstring s2ws( const std::string& str )
         {
             if( str.empty() == true ) 
