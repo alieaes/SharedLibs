@@ -76,7 +76,7 @@ namespace Shared
                 case DATA_TYPE_UINT: { return ( int )_d; } break;
                 case DATA_TYPE_LONG: { return ( int )_d; } break;
                 case DATA_TYPE_ULONG: { return ( int )_d; } break;
-                case DATA_TYPE_DOUBLE: { return ( int )_d; } break;
+                case DATA_TYPE_DOUBLE: { return ( double )_d; } break;
                 case DATA_TYPE_STRING: { return _xs; } break;
                 case DATA_TYPE_BOOL: { return ( int )_b; } break;
                 default: { return "FMT ERROR"; } break;
