@@ -11,5 +11,8 @@
 
 #define DEFAULT_TIME_STRING "yyyy-MM-dd HH:mm:ss"
 
+typedef unsigned int N_TIME_SEC;
+typedef unsigned int N_TIME_MSEC;
+
 #endif
 
