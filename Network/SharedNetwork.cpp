@@ -312,7 +312,7 @@ namespace Shared
 
             do
             {
-                if( _pTCPClient->IsConnected() == false )
+                if( _mapIdToClientInfo.empty() == true )
                     break;
 
                 auto sSend = convertSendMsg( sMsg, 0 );
