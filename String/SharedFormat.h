@@ -18,6 +18,7 @@ namespace Shared
             DATA_TYPE_ULONG,
             DATA_TYPE_DOUBLE,
             DATA_TYPE_STRING,
+            DATA_TYPE_QDATETIME,
             DATA_TYPE_BOOL
         } DATA_TYPE;
 
@@ -28,6 +29,11 @@ namespace Shared
             {
                 _eType = DATA_TYPE_INT;
                 _n = n;
+            };
+            FormatArg( long l )
+            {
+                _eType = DATA_TYPE_LONG;
+                _dw = l;
             };
             FormatArg( double d )
             {
@@ -64,7 +70,13 @@ namespace Shared
                 _eType = DATA_TYPE_STRING;
                 _xs = xs;
             }
-
+#ifdef USING_QT_LIBS
+            FormatArg( QDateTime dt )
+            {
+                _eType = DATA_TYPE_STRING;
+                _dt = dt;
+            }
+#endif
             bool IsInit() { return _init == INT_MAX ? true : false; }
 
             XString Value()
@@ -74,11 +86,14 @@ namespace Shared
                 case DATA_TYPE_NONE: { return "FMT ERROR"; } break;
                 case DATA_TYPE_INT: { return ( int )_n; } break;
                 case DATA_TYPE_UINT: { return ( int )_d; } break;
-                case DATA_TYPE_LONG: { return ( int )_d; } break;
+                case DATA_TYPE_LONG: { return _dw; } break;
                 case DATA_TYPE_ULONG: { return ( int )_d; } break;
                 case DATA_TYPE_DOUBLE: { return ( double )_d; } break;
                 case DATA_TYPE_STRING: { return _xs; } break;
                 case DATA_TYPE_BOOL: { return ( int )_b; } break;
+#ifdef USING_QT_LIBS
+                case DATA_TYPE_QDATETIME: { return _dt.toString( DEFAULT_TIME_STRING ); } break;
+#endif
                 default: { return "FMT ERROR"; } break;
                 }
             }
@@ -91,6 +106,9 @@ namespace Shared
             char* _c = NULL;
             XString _xs;
             bool _b = false;
+#ifdef USING_QT_LIBS
+            QDateTime _dt;
+#endif
         };
 
         inline XString TypeCvt( XString sType, int nNum, bool bNumbers )

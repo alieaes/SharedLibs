@@ -51,6 +51,16 @@ public:
         _str = std::to_wstring( n );
     }
 
+    XString( unsigned int n )
+    {
+        _str = std::to_wstring( n );
+    }
+
+    XString( long n )
+    {
+        _str = std::to_wstring( n );
+    }
+
     XString( double d )
     {
         _str = std::to_wstring( d );
