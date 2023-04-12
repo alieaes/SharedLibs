@@ -153,10 +153,10 @@ namespace Shared
 
                 if( *sRet == '{' )
                 {
-                    int nStart = sRet.find( "{" );
-                    int nEnd = sRet.find( "}" );
+                    size_t nStart = sRet.find( "{" );
+                    size_t nEnd = sRet.find( "}" );
 
-                    int nType = nEnd - nStart;
+                    size_t nType = nEnd - nStart;
                     XString sSub = sRet.substr( nStart, nEnd - nStart + 1 );
 
                     if( sSub.startswith( "{{" ) == true )
@@ -187,8 +187,8 @@ namespace Shared
                     }
                     else if( nType > 1 )
                     {
-                        int nTypeStart = nStart + 1;
-                        int nTypeEnd = nEnd;
+                        size_t nTypeStart = nStart + 1;
+                        size_t nTypeEnd = nEnd;
                         XString sType = sRet.substr( nTypeStart, nTypeEnd - nTypeStart );
 
                         if( sType.contains( ":" ) == true )
@@ -202,7 +202,7 @@ namespace Shared
                             }
                             else
                             {
-                                int nSep = sType.find( ":" );
+                                size_t nSep = sType.find( ":" );
                                 XString sNum = sType.substr( 0, nSep );
 
                                 if( sNum.IsDigit() == false )
