@@ -206,7 +206,12 @@ XString XString::replaceAll( const XString& xa, const XString& xb ) const
     std::wstring tmp = _str;
 
     for( size_t idx = tmp.find( xa.toWString() ); idx >= 0; idx = tmp.find( xa.toWString() ) )
+    {
+        if( idx == std::string::npos )
+            break;
+
         tmp.replace( idx, xa.size(), xb.toWString() );
+    }
 
     return tmp;
 }
