@@ -304,14 +304,14 @@ public:
     bool                             IsDigit() const;
     bool                             Endl() const;
 
-    int                              size() const;
+    size_t                           size() const;
     int                              count( const XString& find ) const;
 
-    XString                          substr( int nDst ) const;
-    XString                          substr( int nSrc, int nSize ) const;
+    XString                          substr( size_t nDst ) const;
+    XString                          substr( size_t nSrc, size_t nSize ) const;
 
-    int                              find_last_of( XString xs ) const;
-    int                              find( XString xs ) const;
+    size_t                           find_last_of( XString xs ) const;
+    size_t                           find( XString xs ) const;
 
     const wchar_t*                   c_str() const;
 

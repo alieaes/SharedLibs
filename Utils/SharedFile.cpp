@@ -22,7 +22,7 @@ namespace Shared
             std::wstring sCurrentPath = std::wstring( result, GetModuleFileName( NULL, result, MAX_PATH ) );
             sCurrentPath = NormalizePath( sCurrentPath ).toWString();
 
-            int find = sCurrentPath.rfind( L'/' );
+            size_t find = sCurrentPath.rfind( L'/' );
             ret = sCurrentPath.substr( 0, find );
 
             if( bIncludeSeparator == true )
@@ -82,7 +82,7 @@ namespace Shared
             int nIncludeDot = isIncludeDot == true ? 0 : 1;
 
             std::wstring sExts = sFileFullPath;
-            int find = sExts.rfind( L'.' ) + nIncludeDot;
+            size_t find = sExts.rfind( L'.' ) + nIncludeDot;
 
             // 확장자가 없는 경우 전체경로를 그대로 돌려줌
             if( find == -1 )
@@ -98,7 +98,7 @@ namespace Shared
                 return XString();
 
             std::wstring sExts = sFileFullPath;
-            int find = sExts.rfind( L'.' );
+            size_t find = sExts.rfind( L'.' );
             return sExts.substr( 0, find );
         }
 

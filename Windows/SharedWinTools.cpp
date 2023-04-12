@@ -441,7 +441,7 @@ namespace Shared
 
             SC_HANDLE hMgr = NULL;
             SC_HANDLE hSvc = NULL;
-            SERVICE_STATUS status;
+            SERVICE_STATUS status{};
 
             do
             {

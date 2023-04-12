@@ -44,7 +44,7 @@ int XString::toInt() const
     {
         n= std::stoi( _str );
     }
-    catch( const std::invalid_argument& ia )
+    catch( [[maybe_unused]] const std::invalid_argument& ia )
     {
         // will be thrown later but with a diff msg
         // it is added just to maintain consistency
@@ -122,7 +122,7 @@ bool XString::Endl() const
     return _nPos > size() ? true : false;
 }
 
-int XString::size() const
+size_t XString::size() const
 {
     return _str.size();
 }
@@ -135,7 +135,7 @@ int XString::count( const XString& find ) const
         return nCount;
 
     size_t sizeFind = std::string::npos;
-    int idx = 0;
+    size_t idx = 0;
 
     while( true )
     {
@@ -154,22 +154,22 @@ int XString::count( const XString& find ) const
     return nCount;
 }
 
-XString XString::substr( int nDst ) const
+XString XString::substr( size_t nDst ) const
 {
     return _str.substr( nDst );
 }
 
-XString XString::substr( int nSrc, int nSize ) const
+XString XString::substr( size_t nSrc, size_t nSize ) const
 {
     return _str.substr( nSrc, nSize );
 }
 
-int XString::find_last_of( XString xs ) const
+size_t XString::find_last_of( XString xs ) const
 {
     return _str.find_last_of( xs.toWString() );
 }
 
-int XString::find( XString xs ) const
+size_t XString::find( XString xs ) const
 {
     return _str.find( xs.toWString() );
 }
@@ -182,7 +182,7 @@ const wchar_t* XString::c_str() const
 std::vector<XString> XString::split( const XString& sSplit ) const
 {
     int nCnt = count( sSplit );
-    int nSize = sSplit.size();
+    size_t nSize = sSplit.size();
 
     std::vector<XString> vecList;
     vecList.reserve( nCnt );
@@ -205,7 +205,7 @@ XString XString::replaceAll( const XString& xa, const XString& xb ) const
 {
     std::wstring tmp = _str;
 
-    for( int idx = tmp.find( xa.toWString() ); idx >= 0; idx = tmp.find( xa.toWString() ) )
+    for( size_t idx = tmp.find( xa.toWString() ); idx >= 0; idx = tmp.find( xa.toWString() ) )
         tmp.replace( idx, xa.size(), xb.toWString() );
 
     return tmp;
