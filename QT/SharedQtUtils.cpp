@@ -6,7 +6,7 @@
 
 #include <Windows.h>
 
-#ifdef USING_QTLIB
+#ifdef USING_QT_LIBS
 #include <qdatetime.h>
 #endif
 
@@ -14,6 +14,7 @@ namespace Shared
 {
     namespace Qt
     {
+#ifdef USING_QT_LIBS
         bool DeCompressQTResources( const QString& sResPath, const QString& sFileName )
         {
             bool isSuccess = false;
@@ -37,5 +38,6 @@ namespace Shared
 
             return isSuccess;
         }
+#endif
     }
 }

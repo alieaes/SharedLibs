@@ -16,6 +16,8 @@
 #include <qdatetime.h>
 #endif
 
+#pragma comment(lib, "Userenv.lib")
+
 namespace Shared
 {
     namespace Process

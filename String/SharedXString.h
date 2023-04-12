@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 
+#include "Windows.h"
 #include "SharedString.h"
 
 class XString

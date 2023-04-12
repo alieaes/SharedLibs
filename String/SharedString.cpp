@@ -15,7 +15,7 @@ namespace Shared
 {
     namespace String
     {
-        std::wstring a2ws(const std::string& str)
+        std::wstring a2ws( const std::string& str )
         {
             if( str.empty() == true )
                 return std::wstring();

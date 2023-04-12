@@ -1,6 +1,8 @@
 #ifndef __HDR_SHARED_FORMAT__
 #define __HDR_SHARED_FORMAT__
 
+#include <cassert>
+
 #include "SharedBase.h"
 
 #include "String/SharedXString.h"
