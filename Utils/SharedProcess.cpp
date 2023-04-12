@@ -29,7 +29,7 @@ namespace Shared
 
         DWORD GetPIDFromProcessName( const XString& sProcessName )
         {
-            DWORD dwPID;
+            DWORD dwPID = 0;
             HANDLE hSnapShot = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
 
             do
