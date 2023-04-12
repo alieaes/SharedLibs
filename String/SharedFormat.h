@@ -57,6 +57,16 @@ namespace Shared
                 _eType = DATA_TYPE_STRING;
                 _xs = cc;
             };
+            FormatArg( const wchar_t wc )
+            {
+                _eType = DATA_TYPE_STRING;
+                _xs = wc;
+            };
+            FormatArg( const wchar_t* wc )
+            {
+                _eType = DATA_TYPE_STRING;
+                _xs = wc;
+            }
             FormatArg( std::wstring ws )
             {
                 _eType = DATA_TYPE_STRING;
