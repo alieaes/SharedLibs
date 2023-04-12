@@ -50,7 +50,7 @@ public:
     QSize                                 GetParentSize();
     QSize                                 GetPosition();
     void                                  MoveStack();
-    Q_INVOKABLE void                      ShowToastMsg( TOAST_ICON icon, TOAST_BUTTON btn, XString sTitle, XString sMsg, int nTimeOutSec = 10 );
+    Q_INVOKABLE void                      ShowToastMsgs( TOAST_ICON icon, TOAST_BUTTON btn, XString sTitle, XString sMsg, int nTimeOutSec = 10 );
     Q_INVOKABLE void                      ShowToastMsg( QString sTitle, QString sMsg, TOAST_ICON icon /*= ICON_INFO*/ );
 
     void                                  CloseToast( cToastNotification* toast );

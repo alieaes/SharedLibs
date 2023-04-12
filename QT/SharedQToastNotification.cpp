@@ -101,7 +101,7 @@ void cToastNotificationMgr::MoveStack()
     }
 }
 
-void cToastNotificationMgr::ShowToastMsg( TOAST_ICON icon, TOAST_BUTTON btn, XString sTitle, XString sMsg, int nTimeOutSec /*= 10*/ )
+void cToastNotificationMgr::ShowToastMsgs( TOAST_ICON icon, TOAST_BUTTON btn, XString sTitle, XString sMsg, int nTimeOutSec /*= 10*/ )
 {
     cToastNotification* cToast = new cToastNotification( this, _wdgParent, icon, btn, _position, sTitle, sMsg, nTimeOutSec );
     cToast->SetToastBoxSize( _ToastSize );
