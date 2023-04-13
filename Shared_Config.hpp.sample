@@ -1,4 +1,4 @@
-#ifndef __SHARED_LIBS_CONFIG__
+﻿#ifndef __SHARED_LIBS_CONFIG__
 #define __SHARED_LIBS_CONFIG__
 
 #define SHARED_SET_CONFIG
