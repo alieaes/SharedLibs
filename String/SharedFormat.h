@@ -104,7 +104,7 @@ namespace Shared
                 case DATA_TYPE_STRING: { return _xs; } break;
                 case DATA_TYPE_BOOL: { return ( int )_b; } break;
 #ifdef USING_QT_LIBS
-                case DATA_TYPE_QDATETIME: { return _dt.toString( DEFAULT_TIME_STRING ); } break;
+                case DATA_TYPE_QDATETIME: { return _dt.toString( DEFAULT_TIME_STRING ).toStdWString(); } break;
 #endif
                 default: { return "FMT ERROR"; } break;
                 }
