@@ -264,7 +264,7 @@ void cToastNotification::SetToastUI()
         default: break;
     }
 
-    XString sStyle = Shared::Format::Format( "QWidget {{ background-color:{}; border-radius: 7px; }", sBgColor );
+    XString sStyle = Shared::Format::Format( "QWidget {{ background-color:{}; border-radius: 7px; }}", sBgColor );
 
     _wdgToastMsg->setStyleSheet( sStyle );
 

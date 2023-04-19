@@ -156,11 +156,17 @@ int XString::count( const XString& find ) const
 
 XString XString::substr( size_t nDst ) const
 {
+    if( nDst == std::string::npos )
+        return "";
+
     return _str.substr( nDst );
 }
 
 XString XString::substr( size_t nSrc, size_t nSize ) const
 {
+    if( nSrc == std::string::npos || nSize == std::string::npos )
+        return "";
+
     return _str.substr( nSrc, nSize );
 }
 
