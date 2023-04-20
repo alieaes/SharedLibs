@@ -1,0 +1,64 @@
+﻿syntax = "proto3";
+package utils;
+
+enum eReqCode {
+	REQ_NONE                              = 0;
+
+	REQ_NEED_UPDATE                       = 1;
+
+	REQ_AUTH_LOGIN                        = 2;
+	REQ_AUTH_SIGNUP                       = 3;
+	REQ_EXEC_FUNCTION                     = 4;
+}
+
+enum eResCode {
+	RES_NONE                              = 0;
+
+	RES_SUCCESS                           = 1;
+	RES_SOME_SUCCESS                      = 2;
+	RES_FAILED                            = 3;
+
+	RES_NEED                              = 4;
+	RES_NOT_NEED                          = 5;
+}
+
+message msgFunction {
+	string                 module               = 1;
+	string                 function             = 2;
+}
+
+message msgMap {
+	string                 key                  = 1;
+	string                 value                = 2;
+}
+
+message clientInfo {
+	string                 clientVer            = 1;
+}
+
+message authInfo {
+	string                 id                   = 1;
+	string                 pw                   = 2;
+	string                 email                = 3;
+}
+
+message msgPacket {
+    string                 identifier           = 1;
+
+    sint32                 msgID                = 2;
+	string                 uniqueID             = 3;
+
+	eReqCode               reqCode              = 4;
+	eResCode               resCode              = 5;
+
+	uint32                 sendPacketTime       = 6;
+	uint32                 receivePacketTime    = 7;
+	uint32                 reSendPacketTime     = 8;
+
+	clientInfo             clientInfo           = 9;
+    authInfo               autoInfo             = 10;
+
+	msgFunction            functionInco         = 11;
+	
+    repeated msgMap        mapItem              = 100;
+}

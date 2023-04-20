@@ -1,0 +1,2 @@
+protoc.exe --cpp_out=./ TEST.proto
+protoc.exe --dart_out=./ TEST.proto
