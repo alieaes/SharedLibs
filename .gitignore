@@ -33,4 +33,7 @@
 
 ######################
 
+*.pb.cc
+*.pb.h
+
 Shared_Config.hpp

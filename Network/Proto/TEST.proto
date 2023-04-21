@@ -32,11 +32,11 @@ message msgMap {
 	string                 value                = 2;
 }
 
-message clientInfo {
+message msgClient {
 	string                 clientVer            = 1;
 }
 
-message authInfo {
+message msgAuth {
 	string                 id                   = 1;
 	string                 pw                   = 2;
 	string                 email                = 3;
@@ -55,10 +55,10 @@ message msgPacket {
 	uint32                 receivePacketTime    = 7;
 	uint32                 reSendPacketTime     = 8;
 
-	clientInfo             clientInfo           = 9;
-    authInfo               autoInfo             = 10;
+	msgClient              clientInfo           = 9;
+    msgAuth                autoInfo             = 10;
 
-	msgFunction            functionInco         = 11;
+	msgFunction            functionInfo         = 11;
 	
     repeated msgMap        mapItem              = 100;
 }
