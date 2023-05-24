@@ -62,6 +62,11 @@ public:
         _str = std::to_wstring( n );
     }
 
+    XString( ULONGLONG ull )
+    {
+        _str = std::to_wstring( ull );
+    }
+
     XString( double d )
     {
         _str = std::to_wstring( d );

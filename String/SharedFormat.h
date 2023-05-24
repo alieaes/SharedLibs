@@ -21,7 +21,8 @@ namespace Shared
             DATA_TYPE_DOUBLE,
             DATA_TYPE_STRING,
             DATA_TYPE_QDATETIME,
-            DATA_TYPE_BOOL
+            DATA_TYPE_BOOL,
+            DATA_TYPE_ULONGLONG
         } DATA_TYPE;
 
         class FormatArg
@@ -82,6 +83,11 @@ namespace Shared
                 _eType = DATA_TYPE_STRING;
                 _xs = xs;
             }
+            FormatArg( ULONGLONG ull )
+            {
+                _eType = DATA_TYPE_ULONGLONG;
+                _ull = ull;
+            }
 #ifdef USING_QT_LIBS
             FormatArg( QDateTime dt )
             {
@@ -99,10 +105,11 @@ namespace Shared
                 case DATA_TYPE_INT: { return ( int )_n; } break;
                 case DATA_TYPE_UINT: { return ( int )_d; } break;
                 case DATA_TYPE_LONG: { return _dw; } break;
-                case DATA_TYPE_ULONG: { return ( int )_d; } break;
+                case DATA_TYPE_ULONG: { return _dw; } break;
                 case DATA_TYPE_DOUBLE: { return ( double )_d; } break;
                 case DATA_TYPE_STRING: { return _xs; } break;
                 case DATA_TYPE_BOOL: { return ( int )_b; } break;
+                case DATA_TYPE_ULONGLONG: { return ( ULONGLONG )_ull; } break;
 #ifdef USING_QT_LIBS
                 case DATA_TYPE_QDATETIME: { return _dt.toString( DEFAULT_TIME_STRING ).toStdWString(); } break;
 #endif
@@ -118,6 +125,7 @@ namespace Shared
             char* _c = NULL;
             XString _xs;
             bool _b = false;
+            ULONGLONG _ull = 0;
 #ifdef USING_QT_LIBS
             QDateTime _dt;
 #endif
