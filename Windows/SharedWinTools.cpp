@@ -47,6 +47,39 @@ namespace Shared
             return isSuccess;
         }
 
+        bool SetRegDwordValue( HKEY hkey, const std::wstring& subKey, const std::wstring& valueName, const DWORD valueData, bool isWrite32Key )
+        {
+            DWORD dwFlags = KEY_WRITE;
+            HKEY key = NULL;
+            bool isSuccess = false;
+
+            if( isWrite32Key == true )
+                dwFlags |= KEY_WOW64_32KEY;
+            else
+                dwFlags |= KEY_WOW64_64KEY;
+
+            LONG lErr = RegOpenKeyExW( hkey, subKey.c_str(), 0, dwFlags, &key );
+            isSuccess = lErr == ERROR_SUCCESS;
+            if( isSuccess == false )
+            {
+                if( lErr == ERROR_FILE_NOT_FOUND )
+                {
+                    lErr = RegCreateKeyExW( hkey, subKey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, dwFlags, NULL, &key, NULL );
+                }
+            }
+
+            if( lErr != ERROR_SUCCESS )
+                return isSuccess;
+
+            lErr = RegSetValueExW( key, valueName.c_str(), 0, REG_DWORD, reinterpret_cast< const BYTE* >( &valueData ), sizeof( DWORD ) );
+            isSuccess = lErr == ERROR_SUCCESS;
+
+            if( key != NULL )
+                RegCloseKey( key );
+
+            return isSuccess;
+        }
+
         bool GetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::wstring& valueData, bool isRead32View )
         {
             HKEY key = NULL;
@@ -441,7 +474,6 @@ namespace Shared
 
             SC_HANDLE hMgr = NULL;
             SC_HANDLE hSvc = NULL;
-            SERVICE_STATUS status{};
 
             do
             {
@@ -461,6 +493,60 @@ namespace Shared
                 }
 
                 isSuccess = true;
+
+            } while( false );
+
+            if( hSvc != NULL )
+                CloseServiceHandle( hSvc );
+
+            if( hMgr != NULL )
+                CloseServiceHandle( hMgr );
+
+            return isSuccess;
+        }
+
+        bool StopWindowsService( const XString& sSvcName )
+        {
+            bool isSuccess = false;
+            SC_HANDLE hMgr = NULL;
+            SC_HANDLE hSvc = NULL;
+            SERVICE_STATUS status{};
+
+            do
+            {
+                hMgr = OpenSCManagerW( NULL, NULL, SC_MANAGER_ALL_ACCESS );
+                if( hMgr == NULL )
+                    break;
+
+                hSvc = OpenServiceW( hMgr, sSvcName, SERVICE_ALL_ACCESS );
+                if( hSvc == NULL )
+                    break;
+
+                QueryServiceStatus( hSvc, &status );
+
+                if( status.dwCurrentState == SERVICE_STOPPED )
+                {
+                    isSuccess = true;
+                    break;
+                }
+
+                if( ControlService( hSvc, SERVICE_CONTROL_STOP, &status ) == TRUE )
+                {
+                    for( UINT nSec = 0; nSec < 5; ++nSec )
+                    {
+                        QueryServiceStatus( hSvc, &status );
+                        if( status.dwCurrentState == SERVICE_STOPPED )
+                        {
+                            isSuccess = true;
+                            break;
+                        }
+                        Sleep( 1000 );
+                    }
+                }
+                else
+                {
+                    isSuccess = false;
+                }
 
             } while( false );
 

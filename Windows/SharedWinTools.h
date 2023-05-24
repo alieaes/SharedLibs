@@ -18,6 +18,7 @@ namespace Shared
     namespace Windows
     {
         bool                           SetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& valueName, const std::wstring& valueData, bool isWrite32Key );
+        bool                           SetRegDwordValue( HKEY hkey, const std::wstring& subKey, const std::wstring& valueName, const DWORD valueData, bool isWrite32Key );
         bool                           GetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::wstring& valueData, bool isRead32View );
         bool                           GetRegBinaryValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::vector<BYTE>& vecValueData, bool isRead32View );
 
@@ -30,6 +31,7 @@ namespace Shared
         bool                           RemoveWindowsService( const XString& sSvcName );
         bool                           IsRunningService( const XString& sSvcName );
         bool                           IsExistService( const XString& sSvcName );
+        bool                           StopWindowsService( const XString& sSvcName );
 
         bool                           SetPrivilege( LPCTSTR lpszPrivilege, BOOL isEnable );
     }
