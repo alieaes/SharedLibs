@@ -13,14 +13,16 @@
 
 class XString;
 
+typedef std::pair< bool, XString > prResultString;
+
 namespace Shared
 {
     namespace Windows
     {
-        bool                           SetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& valueName, const std::wstring& valueData, bool isWrite32Key );
-        bool                           SetRegDwordValue( HKEY hkey, const std::wstring& subKey, const std::wstring& valueName, const DWORD valueData, bool isWrite32Key );
-        bool                           GetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::wstring& valueData, bool isRead32View );
-        bool                           GetRegBinaryValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::vector<BYTE>& vecValueData, bool isRead32View );
+        bool                           SetRegStrValue( HKEY hkey, const XString& sSubKey, const XString& sValueName, const XString& valueData, bool is32Key );
+        bool                           SetRegDWORDValue( HKEY hkey, const XString& sSubKey, const XString& sValueName, const DWORD valueData, bool is32Key );
+
+        prResultString                 GetRegValue( HKEY hkey, const XString& sSubKey, const XString& sValueName, bool is32Key );
 
         std::wstring                   GetProcessSID( uint32_t dwProcessID, bool* ok = NULLPTR );
 

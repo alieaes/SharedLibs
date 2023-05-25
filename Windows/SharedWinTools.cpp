@@ -14,216 +14,166 @@ namespace Shared
 {
     namespace Windows
     {
-        bool SetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& valueName, const std::wstring& valueData, bool isWrite32Key )
+        bool SetRegStrValue( HKEY hkey, const XString& sSubKey, const XString& sValueName, const XString& valueData, bool is32Key )
         {
-            DWORD dwFlags = KEY_WRITE;
-            HKEY key = NULL;
             bool isSuccess = false;
-
-            if( isWrite32Key == true )
-                dwFlags |= KEY_WOW64_32KEY;
-            else
-                dwFlags |= KEY_WOW64_64KEY;
-
-            LONG lErr = RegOpenKeyExW( hkey, subKey.c_str(), 0, dwFlags, &key );
-            isSuccess = lErr == ERROR_SUCCESS;
-            if( isSuccess == false )
-            {
-                if( lErr == ERROR_FILE_NOT_FOUND )
-                {
-                    lErr = RegCreateKeyExW( hkey, subKey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, dwFlags, NULL, &key, NULL );
-                }
-            }
-
-            if( lErr != ERROR_SUCCESS )
-                return isSuccess;
-
-            lErr = RegSetValueExW( key, valueName.c_str(), 0, REG_SZ, ( PBYTE )( valueData.c_str() ), sizeof( WCHAR ) * ( DWORD )( ( valueData.size() + 1 ) ) );
-            isSuccess = lErr == ERROR_SUCCESS;
-
-            if( key != NULL )
-                RegCloseKey( key );
-
-            return isSuccess;
-        }
-
-        bool SetRegDwordValue( HKEY hkey, const std::wstring& subKey, const std::wstring& valueName, const DWORD valueData, bool isWrite32Key )
-        {
-            DWORD dwFlags = KEY_WRITE;
+            REGSAM accessMask = KEY_WRITE;
             HKEY key = NULL;
-            bool isSuccess = false;
-
-            if( isWrite32Key == true )
-                dwFlags |= KEY_WOW64_32KEY;
-            else
-                dwFlags |= KEY_WOW64_64KEY;
-
-            LONG lErr = RegOpenKeyExW( hkey, subKey.c_str(), 0, dwFlags, &key );
-            isSuccess = lErr == ERROR_SUCCESS;
-            if( isSuccess == false )
-            {
-                if( lErr == ERROR_FILE_NOT_FOUND )
-                {
-                    lErr = RegCreateKeyExW( hkey, subKey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, dwFlags, NULL, &key, NULL );
-                }
-            }
-
-            if( lErr != ERROR_SUCCESS )
-                return isSuccess;
-
-            lErr = RegSetValueExW( key, valueName.c_str(), 0, REG_DWORD, reinterpret_cast< const BYTE* >( &valueData ), sizeof( DWORD ) );
-            isSuccess = lErr == ERROR_SUCCESS;
-
-            if( key != NULL )
-                RegCloseKey( key );
-
-            return isSuccess;
-        }
-
-        bool GetRegStrValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::wstring& valueData, bool isRead32View )
-        {
-            HKEY key = NULL;
-            bool isSuccess = false;
 
             do
             {
-                valueData.clear();
-                DWORD dwFlags = KEY_READ;
-
-                if( isRead32View == true )
-                    dwFlags |= KEY_WOW64_32KEY;
+                if( is32Key == true )
+                    accessMask |= KEY_WOW64_32KEY;
                 else
-                    dwFlags |= KEY_WOW64_64KEY;
+                    accessMask |= KEY_WOW64_64KEY;
 
-                LONG lErr = RegOpenKeyExW( hkey, subKey.c_str(), 0, dwFlags, &key );
-                isSuccess = lErr == ERROR_SUCCESS;
+                LSTATUS status = RegOpenKeyExW( hkey, sSubKey.c_str(), 0, accessMask, &key );
 
-                if( isSuccess == false )
+                if( status != ERROR_SUCCESS )
+                {
+                    if( status == ERROR_FILE_NOT_FOUND )
+                        status = RegCreateKeyExW( hkey, sSubKey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, accessMask, NULL, &key, NULL );
+
+                    if( status != ERROR_SUCCESS )
+                        break;
+                }
+
+                status = RegSetValueExW( key, sValueName.c_str(), 0, REG_SZ, ( PBYTE )( valueData.c_str() ), sizeof( WCHAR ) * ( DWORD )( ( valueData.size() + 1 ) ) );
+
+                if( status == ERROR_SUCCESS )
+                    isSuccess = true;
+            }
+            while( false );
+
+            if( key != NULL )
+                RegCloseKey( key );
+
+            return isSuccess;
+        }
+
+        bool SetRegDWORDValue( HKEY hkey, const XString& sSubKey, const XString& sValueName, const DWORD valueData, bool is32Key )
+        {
+            bool isSuccess = false;
+            REGSAM accessMask = KEY_WRITE;
+            HKEY key = NULL;
+
+            do
+            {
+                if( is32Key == true )
+                    accessMask |= KEY_WOW64_32KEY;
+                else
+                    accessMask |= KEY_WOW64_64KEY;
+
+                LSTATUS status = RegOpenKeyExW( hkey, sSubKey.c_str(), 0, accessMask, &key );
+
+                if( status != ERROR_SUCCESS )
+                {
+                    if( status == ERROR_FILE_NOT_FOUND )
+                        status = RegCreateKeyExW( hkey, sSubKey.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, accessMask, NULL, &key, NULL );
+
+                    if( status != ERROR_SUCCESS )
+                        break;
+                }
+
+                status = RegSetValueExW( key, sValueName.c_str(), 0, REG_DWORD, reinterpret_cast< const BYTE* >( &valueData ), sizeof( DWORD ) );
+
+                if( status == ERROR_SUCCESS )
+                    isSuccess = true;
+            }
+            while( false );
+
+            if( key != NULL )
+                RegCloseKey( key );
+
+            return isSuccess;
+        }
+
+        prResultString GetRegValue( HKEY hkey, const XString& sSubKey, const XString& sValueName, bool is32Key )
+        {
+            prResultString prResult( false, "" );
+            HKEY key = NULL;
+            REGSAM accessMask = KEY_READ;
+
+            do
+            {
+                if( is32Key == true )
+                    accessMask |= KEY_WOW64_32KEY;
+                else
+                    accessMask |= KEY_WOW64_64KEY;
+
+                LSTATUS status = RegOpenKeyExW( hkey, sSubKey.c_str(), 0, accessMask, &key );
+
+                if( status != ERROR_SUCCESS )
                     break;
 
-                DWORD dwDataLength = 0;
-                DWORD dwDataType = 0;
+                DWORD dwType = 0;
+                DWORD dwCbData = 0;
 
-                lErr = RegQueryValueExW( key, sValueName.c_str(), 0, &dwDataType, NULL, &dwDataLength );
-                isSuccess = lErr == ERROR_SUCCESS;
+                status = RegQueryValueExW( key, sValueName.c_str(), 0, &dwType, NULL, &dwCbData );
 
-                if( isSuccess == false )
+                if( status != ERROR_SUCCESS )
                     break;
 
-                switch( dwDataType )
+                switch( dwType )
                 {
                     case REG_SZ:
                     case REG_EXPAND_SZ:
                     case REG_MULTI_SZ:
                     {
                         std::vector< wchar_t > vecRetVal;
-                        vecRetVal.resize( dwDataLength + 1 );
+                        vecRetVal.resize( dwCbData + 1 );
 
-                        lErr = RegQueryValueExW( key, sValueName.c_str(), 0, NULL, ( LPBYTE )&vecRetVal[ 0 ], &dwDataLength );
-                        isSuccess = lErr == ERROR_SUCCESS;
+                        status = RegQueryValueExW( key, sValueName.c_str(), 0, NULL, ( LPBYTE )&vecRetVal[ 0 ], &dwCbData );
 
-                        if( isSuccess == false )
+                        if( status != ERROR_SUCCESS )
                             break;
 
-                        if( dwDataType != REG_MULTI_SZ )
-                            valueData = std::wstring( &vecRetVal[ 0 ] );
-                        else if( dwDataType == REG_MULTI_SZ )
-                            valueData.assign( &vecRetVal[ 0 ], vecRetVal.size() );
+                        // TODO : REG_MULTI_SZ의 경우 개행이 들어가게 되면 '\0'으로 들어옴. 수정 필요함
+                        if( dwType == REG_MULTI_SZ )
+                            prResult.second = std::wstring( &vecRetVal[ 0 ], vecRetVal.size() );
+                        else
+                            prResult.second = std::wstring( &vecRetVal[ 0 ], vecRetVal.size() );
 
-                        isSuccess = true;
+                        prResult.first = true;
                         break;
                     }
                     case REG_DWORD:
                     case REG_QWORD:
                     {
-                        unsigned __int64 retVal = 0;
+                        DWORD dwRet = 0;
 
-                        lErr = RegQueryValueExW( key, sValueName.c_str(), 0, NULL, ( LPBYTE )&retVal, &dwDataLength );
-                        isSuccess = lErr == ERROR_SUCCESS;
+                        status = RegQueryValueExW( key, sValueName.c_str(), 0, NULL, ( LPBYTE )&dwRet, &dwCbData );
 
-                        if( isSuccess == false )
+                        if( status != ERROR_SUCCESS )
                             break;
 
-                        wchar_t wszBuffer[ 1024 ] = { 0, };
-                        errno_t err = _ui64tow_s( retVal, wszBuffer, 1024, 10 );
-                        if( err == 0 )
-                        {
-                            isSuccess = true;
-                            valueData = wszBuffer;
-                        }
+                        prResult.first = true;
+                        prResult.second = dwRet;
 
                         break;
                     }
-                    default:
-                    {
-                        break;
-                    }
-                }
-
-            } while( false );
-
-            if( key != NULL )
-                RegCloseKey( key );
-
-            return isSuccess;
-        }
-
-        bool GetRegBinaryValue( HKEY hkey, const std::wstring& subKey, const std::wstring& sValueName, std::vector<BYTE>& vecValueData, bool isRead32View )
-        {
-            HKEY key = NULL;
-            bool isSuccess = false;
-
-            do
-            {
-                vecValueData.clear();
-                DWORD dwFlags = KEY_READ;
-
-                if( isRead32View == true )
-                    dwFlags |= KEY_WOW64_32KEY;
-                else
-                    dwFlags |= KEY_WOW64_64KEY;
-
-                LONG lErr = RegOpenKeyExW( hkey, subKey.c_str(), 0, dwFlags, &key );
-                isSuccess = lErr == ERROR_SUCCESS;
-
-                if( isSuccess == false )
-                    break;
-
-                DWORD dwDataLength = 0;
-                DWORD dwDataType = 0;
-
-                lErr = RegQueryValueExW( key, sValueName.c_str(), 0, &dwDataType, NULL, &dwDataLength );
-                isSuccess = lErr == ERROR_SUCCESS;
-
-                if( isSuccess == false )
-                    break;
-
-                switch( dwDataType )
-                {
                     case REG_BINARY:
                     {
-                        vecValueData.resize( dwDataLength + 1 );
+                        std::vector<BYTE> vecByte;
+                        vecByte.resize( dwCbData + 1 );
 
-                        lErr = RegQueryValueExW( key, sValueName.c_str(), 0, NULL, ( LPBYTE )&vecValueData[ 0 ], &dwDataLength );
-                        isSuccess = lErr == ERROR_SUCCESS;
+                        status = RegQueryValueExW( key, sValueName.c_str(), 0, NULL, ( LPBYTE )&vecByte[ 0 ], &dwCbData );
 
-                        if( isSuccess == false )
+                        if( status != ERROR_SUCCESS )
                             break;
 
-                        break;
-                    }
-                    default:
-                    {
+                        prResult.first = true;
+                        prResult.second = &vecByte[ 0 ];
+
                         break;
                     }
                 }
-
             } while( false );
 
             if( key != NULL )
                 RegCloseKey( key );
 
-            return isSuccess;
+            return prResult;
         }
 
         std::wstring GetProcessSID( uint32_t dwProcessID, bool* ok /*= NULLPTR */ )
