@@ -7,6 +7,8 @@
 #include "Windows.h"
 #include "SharedString.h"
 
+#include "Shared_Config.hpp"
+
 class XString
 {
 public:
