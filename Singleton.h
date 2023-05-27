@@ -19,7 +19,6 @@ namespace Shared
         class Singleton
         {
         public:
-            Singleton() {}
 
             static T* GetInstance()
             {
@@ -32,10 +31,21 @@ namespace Shared
             static void DestroyInstance()
             {
                 if( _instance != NULLPTR )
+                {
                     delete _instance;
+                    _instance = NULLPTR;
+                }
             }
 
         private:
+            Singleton() {}
+            ~Singleton() {}
+
+            Singleton( const Singleton& ) = delete;
+            Singleton( Singleton&& ) = delete;
+            Singleton& operator=( const Singleton& ) = delete;
+            Singleton& operator=( Singleton&& ) = delete;
+
             static T* _instance;
             static std::once_flag _flag;
         };
