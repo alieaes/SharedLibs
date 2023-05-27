@@ -2,6 +2,8 @@
 * @file Socket.cpp
 * @brief implementation of the Socket class
 * @author Mohamed Amine Mzoughi <mohamed-amine.mzoughi@laposte.net>
+*
+* WINDOWS;WIN32_LEAN_AND_MEAN;
 */
 
 #include <Network/include/Socket/Socket.h>
