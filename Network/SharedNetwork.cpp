@@ -51,6 +51,10 @@ namespace Shared
                     return strIPAddress;
                 }
             }
+            else
+            {
+                strIPAddress = sIPAddress;
+            }
 
             WSACleanup();
 
@@ -110,6 +114,37 @@ namespace Shared
                 isSuccess = true;
 
             } while( false );
+
+            return isSuccess;
+        }
+
+        bool CNetwork::DisConnect()
+        {
+            bool isSuccess = false;
+            _isStop = true;
+
+            do
+            {
+                if( _networkInfo.eType == NETWORK_CLIENT )
+                {
+                    if( _pTCPClient != NULLPTR )
+                        isSuccess = _pTCPClient->Disconnect();
+
+                    if( _thClientReceiveThread.joinable() == true )
+                        _thClientReceiveThread.join();
+                }
+                else if( _networkInfo.eType == NETWORK_SERVER )
+                {
+                    if( _pTCPServer != NULLPTR )
+                        _pTCPServer.reset( nullptr );
+
+                    if( _thServerListenThread.joinable() == true )
+                        _thServerListenThread.join();
+
+                    isSuccess = true;
+                }
+            }
+            while( false );
 
             return isSuccess;
         }
@@ -515,6 +550,24 @@ namespace Shared
             } while( false );
 
             return pr;
+        }
+
+        bool CNetworkMgr::CloseConnection( XString sName )
+        {
+            bool isSuccess = false;
+
+            do
+            {
+                if( _mapNameToNetworkInfo.count( sName ) > 0 )
+                {
+                    auto network = _mapNameToNetworkInfo[ sName ].network;
+                    isSuccess = network->DisConnect();
+                    _mapNameToNetworkInfo.erase( sName );
+                }
+            }
+            while( false );
+
+            return isSuccess;
         }
     }
 }

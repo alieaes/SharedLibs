@@ -73,6 +73,7 @@ namespace Shared
             ~CNetwork();
 
             bool                                    Connect();
+            bool                                    DisConnect();
 
             void                                    ClientReceiveThread();
             std::pair< bool, MSGID >                ClientSend( XString sMsg );
@@ -141,7 +142,7 @@ namespace Shared
 
             bool                                          NewConnection( tyStNetworkInfo networkInfo );
             std::pair< bool, Shared::Network::CNetwork* > GetConnection( XString sName );
-
+            bool                                          CloseConnection( XString sName );
         private:
 
             std::map< XString, tyStNetworkInfo >    _mapNameToNetworkInfo;
