@@ -11,6 +11,8 @@
 
 #define DEFAULT_TIME_STRING "yyyy-MM-dd HH:mm:ss"
 
+#define PORT_RANGE_MAX 65535
+
 typedef unsigned int N_TIME_SEC;
 typedef unsigned int N_TIME_MSEC;
 
